@@ -254,7 +254,30 @@
         "hi": "वास्तविक संख्याएँ",
         "en": "Real Numbers"
        },
-       "items": []
+       "items": [
+        {
+         "slug": "exercise-1-1",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 1.1",
+          "en": "Exercise 1.1"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-01/exercise-1-1/"
+         }
+        },
+        {
+         "slug": "exercise-1-2",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 1.2",
+          "en": "Exercise 1.2"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-01/exercise-1-2/"
+         }
+        }
+       ]
       },
       {
        "num": 2,
