@@ -1,0 +1,494 @@
+{
+ "site": {
+  "name": {
+   "hi": "MP Board हल",
+   "en": "MP Board Solutions"
+  },
+  "author": {
+   "hi": "हेमंत कुमार टेकन",
+   "en": "Hemant Kumar Tekan"
+  }
+ },
+ "classes": [
+  {
+   "num": 1,
+   "subjects": []
+  },
+  {
+   "num": 2,
+   "subjects": []
+  },
+  {
+   "num": 3,
+   "subjects": []
+  },
+  {
+   "num": 4,
+   "subjects": []
+  },
+  {
+   "num": 5,
+   "subjects": []
+  },
+  {
+   "num": 6,
+   "subjects": []
+  },
+  {
+   "num": 7,
+   "subjects": []
+  },
+  {
+   "num": 8,
+   "subjects": []
+  },
+  {
+   "num": 9,
+   "subjects": [
+    {
+     "slug": "maths",
+     "name": {
+      "hi": "गणित",
+      "en": "Mathematics"
+     },
+     "chapters": [
+      {
+       "num": 1,
+       "name": {
+        "hi": "संख्या पद्धति",
+        "en": "Number Systems"
+       },
+       "items": []
+      },
+      {
+       "num": 2,
+       "name": {
+        "hi": "बहुपद",
+        "en": "Polynomials"
+       },
+       "items": []
+      },
+      {
+       "num": 3,
+       "name": {
+        "hi": "निर्देशांक ज्यामिति",
+        "en": "Coordinate Geometry"
+       },
+       "items": [
+        {
+         "slug": "notes",
+         "type": "notes",
+         "title": {
+          "hi": "विस्तृत अध्ययन सामग्री (कार्तीय पद्धति)",
+          "en": "Detailed Notes"
+         },
+         "hi": {
+          "pdf": "kartiya-paddhati-notes.pdf",
+          "summary": [
+           "कार्तीय पद्धति, अक्ष, मूल बिंदु, चतुर्थांश",
+           "भुज और कोटि, बिंदु आलेखित करना",
+           "8 चित्र, हल किए उदाहरण, 7 अभ्यास प्रश्न उत्तर सहित"
+          ]
+         }
+        },
+        {
+         "slug": "quiz",
+         "type": "quiz",
+         "title": {
+          "hi": "ऑनलाइन क्विज़ (15 प्रश्न)",
+          "en": "Online Quiz"
+         },
+         "hi": {
+          "href": "/hi/quiz/class-09/maths/chapter-03/"
+         }
+        }
+       ]
+      },
+      {
+       "num": 4,
+       "name": {
+        "hi": "दो चरों वाले रैखिक समीकरण",
+        "en": "Linear Equations in Two Variables"
+       },
+       "items": [
+        {
+         "slug": "notes",
+         "type": "notes",
+         "title": {
+          "hi": "विस्तृत अध्ययन सामग्री (प्रश्नावली 4.1 और 4.2 सहित)",
+          "en": "Detailed Notes"
+         },
+         "hi": {
+          "pdf": "do-char-raikhik-samikaran-notes.pdf",
+          "summary": [
+           "मानक रूप ax + by + c = 0, गुणांक a, b, c",
+           "प्रश्नावली 4.1 और 4.2 के सभी प्रश्न हल सहित",
+           "अनंत हल, बिंदु हल है या नहीं, अज्ञात अचर k ज्ञात करना",
+           "सामान्य त्रुटियाँ और उत्तर सहित अभ्यास प्रश्न"
+          ]
+         }
+        }
+       ]
+      },
+      {
+       "num": 5,
+       "name": {
+        "hi": "यूक्लिड की ज्यामिति का परिचय",
+        "en": "Introduction to Euclid's Geometry"
+       },
+       "items": []
+      },
+      {
+       "num": 6,
+       "name": {
+        "hi": "रेखाएँ और कोण",
+        "en": "Lines and Angles"
+       },
+       "items": []
+      },
+      {
+       "num": 7,
+       "name": {
+        "hi": "त्रिभुज",
+        "en": "Triangles"
+       },
+       "items": []
+      },
+      {
+       "num": 8,
+       "name": {
+        "hi": "चतुर्भुज",
+        "en": "Quadrilaterals"
+       },
+       "items": []
+      },
+      {
+       "num": 9,
+       "name": {
+        "hi": "वृत्त",
+        "en": "Circles"
+       },
+       "items": []
+      },
+      {
+       "num": 10,
+       "name": {
+        "hi": "हीरोन का सूत्र",
+        "en": "Heron's Formula"
+       },
+       "items": []
+      },
+      {
+       "num": 11,
+       "name": {
+        "hi": "पृष्ठीय क्षेत्रफल और आयतन",
+        "en": "Surface Areas and Volumes"
+       },
+       "items": []
+      },
+      {
+       "num": 12,
+       "name": {
+        "hi": "सांख्यिकी",
+        "en": "Statistics"
+       },
+       "items": []
+      }
+     ]
+    },
+    {
+     "slug": "science",
+     "name": {
+      "hi": "विज्ञान",
+      "en": "Science"
+     },
+     "chapters": []
+    },
+    {
+     "slug": "social-science",
+     "name": {
+      "hi": "सामाजिक विज्ञान",
+      "en": "Social Science"
+     },
+     "chapters": []
+    },
+    {
+     "slug": "hindi",
+     "name": {
+      "hi": "हिंदी",
+      "en": "Hindi"
+     },
+     "chapters": []
+    },
+    {
+     "slug": "english",
+     "name": {
+      "hi": "अंग्रेज़ी",
+      "en": "English"
+     },
+     "chapters": []
+    },
+    {
+     "slug": "sanskrit",
+     "name": {
+      "hi": "संस्कृत",
+      "en": "Sanskrit"
+     },
+     "chapters": []
+    }
+   ]
+  },
+  {
+   "num": 10,
+   "subjects": [
+    {
+     "slug": "maths",
+     "name": {
+      "hi": "गणित",
+      "en": "Mathematics"
+     },
+     "chapters": [
+      {
+       "num": 1,
+       "name": {
+        "hi": "वास्तविक संख्याएँ",
+        "en": "Real Numbers"
+       },
+       "items": []
+      },
+      {
+       "num": 2,
+       "name": {
+        "hi": "बहुपद",
+        "en": "Polynomials"
+       },
+       "items": []
+      },
+      {
+       "num": 3,
+       "name": {
+        "hi": "दो चर वाले रैखिक समीकरण युग्म",
+        "en": "Pair of Linear Equations in Two Variables"
+       },
+       "items": []
+      },
+      {
+       "num": 4,
+       "name": {
+        "hi": "द्विघात समीकरण",
+        "en": "Quadratic Equations"
+       },
+       "items": []
+      },
+      {
+       "num": 5,
+       "name": {
+        "hi": "समांतर श्रेढ़ियाँ",
+        "en": "Arithmetic Progressions"
+       },
+       "items": []
+      },
+      {
+       "num": 6,
+       "name": {
+        "hi": "त्रिभुज",
+        "en": "Triangles"
+       },
+       "items": []
+      },
+      {
+       "num": 7,
+       "name": {
+        "hi": "निर्देशांक ज्यामिति",
+        "en": "Coordinate Geometry"
+       },
+       "items": []
+      },
+      {
+       "num": 8,
+       "name": {
+        "hi": "त्रिकोणमिति का परिचय",
+        "en": "Introduction to Trigonometry"
+       },
+       "items": []
+      },
+      {
+       "num": 9,
+       "name": {
+        "hi": "त्रिकोणमिति के कुछ अनुप्रयोग",
+        "en": "Some Applications of Trigonometry"
+       },
+       "items": []
+      },
+      {
+       "num": 10,
+       "name": {
+        "hi": "वृत्त",
+        "en": "Circles"
+       },
+       "items": []
+      },
+      {
+       "num": 11,
+       "name": {
+        "hi": "वृत्तों से संबंधित क्षेत्रफल",
+        "en": "Areas Related to Circles"
+       },
+       "items": []
+      },
+      {
+       "num": 12,
+       "name": {
+        "hi": "पृष्ठीय क्षेत्रफल और आयतन",
+        "en": "Surface Areas and Volumes"
+       },
+       "items": [
+        {
+         "slug": "formulas",
+         "type": "notes",
+         "title": {
+          "hi": "सूत्र-सारणी",
+          "en": "Formula Sheet"
+         },
+         "hi": {
+          "pdf": "sutra-sarni.pdf",
+          "summary": [
+           "घन, घनाभ, बेलन, शंकु, गोला, अर्धगोला के सूत्र",
+           "पृष्ठीय क्षेत्रफल और आयतन, एक नज़र में"
+          ]
+         }
+        },
+        {
+         "slug": "exercise-12-1",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 12.1",
+          "en": "Exercise 12.1"
+         },
+         "hi": {
+          "pdf": "prashnavali-12-1.pdf",
+          "answers": [
+           "160 cm²",
+           "572 cm²",
+           "214.5 cm²",
+           "अधिकतम व्यास 7 cm, पृष्ठीय क्षेत्रफल 332.5 cm²",
+           "(l²/4)(24 + π)",
+           "220 mm²",
+           "44 m², लागत ₹ 22000",
+           "लगभग 18 cm² (17.6 cm²)",
+           "374 cm²"
+          ]
+         }
+        },
+        {
+         "slug": "exercise-12-2",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 12.2",
+          "en": "Exercise 12.2"
+         },
+         "hi": {
+          "pdf": "prashnavali-12-2.pdf",
+          "answers": [
+           "π cm³",
+           "66 cm³",
+           "लगभग 338 cm³",
+           "लगभग 523.53 cm³",
+           "100 गोलियाँ",
+           "लगभग 892.26 kg",
+           "लगभग 1131428.57 cm³ (≈ 1.131 m³)",
+           "346.51 cm³; बच्ची का उत्तर (345 cm³) सही नहीं"
+          ]
+         }
+        }
+       ]
+      },
+      {
+       "num": 13,
+       "name": {
+        "hi": "सांख्यिकी",
+        "en": "Statistics"
+       },
+       "items": []
+      },
+      {
+       "num": 14,
+       "name": {
+        "hi": "प्रायिकता",
+        "en": "Probability"
+       },
+       "items": []
+      }
+     ]
+    },
+    {
+     "slug": "science",
+     "name": {
+      "hi": "विज्ञान",
+      "en": "Science"
+     },
+     "chapters": []
+    },
+    {
+     "slug": "social-science",
+     "name": {
+      "hi": "सामाजिक विज्ञान",
+      "en": "Social Science"
+     },
+     "chapters": []
+    },
+    {
+     "slug": "hindi",
+     "name": {
+      "hi": "हिंदी",
+      "en": "Hindi"
+     },
+     "chapters": []
+    },
+    {
+     "slug": "english",
+     "name": {
+      "hi": "अंग्रेज़ी",
+      "en": "English"
+     },
+     "chapters": []
+    },
+    {
+     "slug": "sanskrit",
+     "name": {
+      "hi": "संस्कृत",
+      "en": "Sanskrit"
+     },
+     "chapters": []
+    }
+   ]
+  },
+  {
+   "num": 11,
+   "subjects": []
+  },
+  {
+   "num": 12,
+   "subjects": []
+  }
+ ],
+ "papers": [
+  {
+   "slug": "class-10-maths-half-yearly-practice-2026-27",
+   "class": 10,
+   "subject": "maths",
+   "title": {
+    "hi": "कक्षा 10 गणित — अर्धवार्षिक अभ्यास प्रश्नपत्र 2026-27 (हल सहित)",
+    "en": "Class 10 Maths Half-Yearly Practice Paper 2026-27"
+   },
+   "hi": {
+    "pdf": "class-10-ganit-ardhvarshik-abhyas-2026-27.pdf",
+    "summary": [
+     "कुल 75 अंक, 23 प्रश्न",
+     "अभ्यास (model) प्रश्नपत्र, आधिकारिक MPBSE पेपर नहीं",
+     "पूरे हल सहित"
+    ]
+   }
+  }
+ ]
+}
