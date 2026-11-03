@@ -21,52 +21,74 @@ def therefore(t):
     return f"<p class='ok'>{t}</p>"
 
 
-# ---------------- graphs for Exercise 2.1 ----------------
-def svg(f, zeros, label):
-    W, H, xr, yr = 300, 220, (-5, 5), (-5, 5)
+# ---------------- graphs for Exercise 2.1 (shapes follow NCERT Fig. 2.10) ----------------
+def roots(f, lo, hi, n=4000):
+    out, px, py = [], lo, f(lo)
+    for i in range(1, n + 1):
+        x = lo + (hi - lo) * i / n
+        y = f(x)
+        if py == 0 or py * y < 0:
+            a, b_ = px, x
+            for _ in range(60):
+                mdl = (a + b_) / 2
+                if f(a) * f(mdl) <= 0:
+                    b_ = mdl
+                else:
+                    a = mdl
+            out.append((a + b_) / 2)
+        px, py = x, y
+    return out
+
+
+def svg(f, dom, touches, label):
+    W, H, xr, yr = 300, 260, (-5, 5), (-5, 5)
     sx = lambda x: (x - xr[0]) / (xr[1] - xr[0]) * W
     sy = lambda y: H - (y - yr[0]) / (yr[1] - yr[0]) * H
-    pts, path = [], []
+    pts = []
     for i in range(401):
-        x = xr[0] + (xr[1] - xr[0]) * i / 400
+        x = dom[0] + (dom[1] - dom[0]) * i / 400
         y = f(x)
-        if yr[0] - 1 < y < yr[1] + 1:
+        if yr[0] + 0.4 <= y <= yr[1] - 0.4:
             pts.append(f"{sx(x):.1f},{sy(y):.1f}")
-        elif pts:
-            path.append(pts); pts = []
-    if pts:
-        path.append(pts)
-    poly = "".join(f"<polyline points='{' '.join(p)}' fill='none' stroke='#1f5aa6' stroke-width='2.6'/>" for p in path)
-    grid = "".join(f"<line x1='{sx(i):.1f}' y1='0' x2='{sx(i):.1f}' y2='{H}' stroke='#eef1f7'/>" for i in range(-5, 6))
-    grid += "".join(f"<line x1='0' y1='{sy(i):.1f}' x2='{W}' y2='{sy(i):.1f}' stroke='#eef1f7'/>" for i in range(-5, 6))
-    axes = (f"<line x1='0' y1='{sy(0):.1f}' x2='{W}' y2='{sy(0):.1f}' stroke='#333' stroke-width='1.4'/>"
-            f"<line x1='{sx(0):.1f}' y1='0' x2='{sx(0):.1f}' y2='{H}' stroke='#333' stroke-width='1.4'/>"
-            f"<text x='{W - 12}' y='{sy(0) - 6:.1f}' font-size='13'>X</text><text x='{sx(0) + 6:.1f}' y='14' font-size='13'>Y</text>"
-            f"<text x='{sx(0) + 4:.1f}' y='{sy(0) + 14:.1f}' font-size='11'>O</text>")
-    dots = "".join(f"<circle cx='{sx(z):.1f}' cy='{sy(0):.1f}' r='5' fill='#d6336c'/>" for z in zeros)
-    return (f"<svg class='graph' viewBox='0 0 {W} {H}' role='img' aria-label='{label}'>{grid}{axes}{poly}{dots}"
-            f"<text x='8' y='{H - 8}' font-size='12' fill='#555'>y = p(x)</text></svg>")
+    grid = "".join(f"<line x1='{sx(i/2):.1f}' y1='0' x2='{sx(i/2):.1f}' y2='{H}' stroke='#d6e6f7'/>" for i in range(-10, 11))
+    grid += "".join(f"<line x1='0' y1='{sy(i/2):.1f}' x2='{W}' y2='{sy(i/2):.1f}' stroke='#d6e6f7'/>" for i in range(-10, 11))
+    mk = ("<defs><marker id='ar' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='10' markerHeight='10' markerUnits='userSpaceOnUse' orient='auto-start-reverse'>"
+          "<path d='M0,0 L10,5 L0,10 z' fill='#222'/></marker></defs>")
+    axes = (f"<line x1='14' y1='{sy(0):.1f}' x2='{W-14}' y2='{sy(0):.1f}' stroke='#222' stroke-width='1.6' marker-start='url(#ar)' marker-end='url(#ar)'/>"
+            f"<line x1='{sx(0):.1f}' y1='14' x2='{sx(0):.1f}' y2='{H-14}' stroke='#222' stroke-width='1.6' marker-start='url(#ar)' marker-end='url(#ar)'/>"
+            f"<text x='{W-12}' y='{sy(0)+5:.1f}' font-size='14' font-weight='700'>X</text><text x='0' y='{sy(0)+5:.1f}' font-size='14' font-weight='700'>X′</text>"
+            f"<text x='{sx(0)+6:.1f}' y='14' font-size='14' font-weight='700'>Y</text><text x='{sx(0)+6:.1f}' y='{H-2}' font-size='14' font-weight='700'>Y′</text>"
+            f"<text x='{sx(0)-14:.1f}' y='{sy(0)+16:.1f}' font-size='13'>O</text>")
+    z = roots(f, dom[0], dom[1]) + touches
+    dots = "".join(f"<circle cx='{sx(t):.1f}' cy='{sy(0):.1f}' r='5' fill='#d6336c'/>" for t in z)
+    curve = f"<polyline points='{' '.join(pts)}' fill='none' stroke='#1f5aa6' stroke-width='2.6'{' marker-start=\"url(#ar)\" marker-end=\"url(#ar)\"' if label.endswith('(i)') else ''}/>"
+    return (f"<svg class='graph' viewBox='0 0 {W} {H}' role='img' aria-label='{label}'>{mk}<rect width='{W}' height='{H}' fill='#eaf4fd'/>{grid}{axes}{curve}{dots}</svg>"), len(z)
+
+
+def k2(x):
+    return 0.28 * (x ** 3 / 3 + 0.25 * x * x - 3 * x) - 2.713
 
 
 GRAPHS = [
-    ("(i)", lambda x: 3, [], 0, "आलेख x-अक्ष के समांतर एक सरल रेखा है, जो x-अक्ष को कहीं नहीं काटती।"),
-    ("(ii)", lambda x: 0.8 * x + 1.6, [-2], 1, "आलेख x-अक्ष को केवल एक बिंदु पर काटता है।"),
-    ("(iii)", lambda x: 0.12 * x * (x - 3) * (x + 3), [-3, 0, 3], 3, "आलेख x-अक्ष को तीन बिंदुओं पर काटता है।"),
-    ("(iv)", lambda x: 0.5 * (x * x - 4), [-2, 2], 2, "आलेख x-अक्ष को दो बिंदुओं पर काटता है।"),
-    ("(v)", lambda x: 0.12 * (x * x - 1) * (x * x - 9), [-3, -1, 1, 3], 4, "आलेख x-अक्ष को चार बिंदुओं पर काटता है।"),
-    ("(vi)", lambda x: 0.12 * (x + 3) * x * (x - 2) ** 2, [-3, 0, 2], 3, "आलेख x-अक्ष को तीन बिंदुओं पर काटता/स्पर्श करता है।"),
+    ("(i)", lambda x: 2.6, (-2.6, 2.6), [], 0, "आलेख x-अक्ष के समांतर एक सरल रेखा है, जो x-अक्ष को किसी भी बिंदु पर नहीं काटती।"),
+    ("(ii)", k2, (-4.4, 4.0), [], 1, "आलेख x-अक्ष को केवल एक बिंदु पर काटता है।"),
+    ("(iii)", lambda x: 0.33 * (x + 2.0) * (x - 1.3) * (x - 2.8), (-3.2, 4.2), [], 3, "आलेख x-अक्ष को तीन बिंदुओं पर काटता है।"),
+    ("(iv)", lambda x: 0.6 * (x + 3.6) * (x + 1.0), (-4.4, -0.3), [], 2, "आलेख x-अक्ष को दो बिंदुओं पर काटता है।"),
+    ("(v)", lambda x: -0.055 * (x + 3.6) * (x + 1.0) * (x - 0.5) * (x - 3.6), (-4.4, 4.3), [], 4, "आलेख x-अक्ष को चार बिंदुओं पर काटता है।"),
+    ("(vi)", lambda x: 0.077 * (x + 3.2) * (x + 1.5) ** 2 * (x - 1.8) ** 2, (-3.6, 2.9), [-1.5, 1.8], 3,
+     "आलेख x-अक्ष को एक बिंदु पर काटता है और दो बिंदुओं पर स्पर्श करता है; कुल तीन बिंदु।"),
 ]
 
 EX21 = []
 b = given("कुछ बहुपदों p(x) के आलेख y = p(x)", "प्रत्येक स्थिति में p(x) के शून्यकों की संख्या")
 b += formula("नियम", "बहुपद p(x) के शून्यकों की संख्या = आलेख y = p(x) द्वारा x-अक्ष को काटने (या स्पर्श करने) वाले बिंदुओं की संख्या")
-b += "<p class='muted'>नीचे के आलेख पाठ्यपुस्तक की आकृति 2.10 जैसे बनाए गए हैं; लाल बिंदु वे स्थान हैं जहाँ आलेख x-अक्ष से मिलता है।</p>"
-for lab, f, z, n, why in GRAPHS:
-    for zz in z:
-        assert abs(f(zz)) < 1e-9
-    b += part(lab, svg(f, z, f"आलेख {lab}") + f"<p>{why}</p>" + therefore(f"अतः शून्यकों की संख्या = {n}"))
+b += "<p class='muted'>आलेख पाठ्यपुस्तक की आकृति 2.10 के अनुसार हैं; लाल बिंदु वे स्थान हैं जहाँ आलेख x-अक्ष को काटता या स्पर्श करता है।</p>"
+for lab, f, dom, tch, n, why in GRAPHS:
+    g, cnt = svg(f, dom, tch, f"आलेख {lab}")
+    assert cnt == n, (lab, cnt)
+    b += part(lab, g + f"<p>{why}</p>" + therefore(f"अतः p(x) के शून्यकों की संख्या = {n}"))
 b += ans("(i) 0 (ii) 1 (iii) 3 (iv) 2 (v) 4 (vi) 3")
-EX21.append(("नीचे दी गई आकृति में किन्हीं बहुपदों p(x) के आलेख y = p(x) दिए गए हैं। प्रत्येक स्थिति में p(x) के शून्यकों की संख्या ज्ञात कीजिए।", b))
+EX21.append(("किसी बहुपद p(x) के लिए, y = p(x) का ग्राफ नीचे आकृति 2.10 में दिया है। प्रत्येक स्थिति में, p(x) के शून्यकों की संख्या ज्ञात कीजिए।", b))
 
 # ---------------- Exercise 2.2 ----------------
 SUMF = formula("शून्यक और गुणांकों में संबंध", m("ax^2+bx+c") + " के शून्यक " + m("\\alpha") + " और " + m("\\beta") + " हों, तो "
