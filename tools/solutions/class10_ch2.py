@@ -210,18 +210,19 @@ def q2(lab, S, Pp, steps, k, final):
     body = given("शून्यकों का योग " + m("S=" + S) + ", गुणनफल " + m("P=" + Pp), "द्विघात बहुपद")
     body += lines("p(x)", *steps)
     if k:
-        body += f"<p>भिन्न हटाने के लिए k = {k} लेने पर</p>"
-    if steps[-1] != final:
+        body += f"<p>भिन्न हटाने के लिए k = {k} लेकर सभी पदों को {k} से गुणा करने पर</p>"
+        body += lines("p(x)", f"{k}\\left({steps[-1]}\\right)", final)
+    elif steps[-1] != final:
         body += lines("p(x)", final)
     body += therefore("अतः अभीष्ट द्विघात बहुपद " + m(final) + " है।")
     R.append((lab, body, final))
 
 
-q2("(i)", "\\dfrac{1}{4}", "-1", ["x^2-\\left(\\dfrac{1}{4}\\right)x+(-1)", "x^2-\\dfrac{x}{4}-1", "\\dfrac{4x^2-x-4}{4}"], 4, "4x^2-x-4")
-q2("(ii)", "\\sqrt{2}", "\\dfrac{1}{3}", ["x^2-\\sqrt{2}\\,x+\\dfrac{1}{3}", "\\dfrac{3x^2-3\\sqrt{2}\\,x+1}{3}"], 3, "3x^2-3\\sqrt{2}\\,x+1")
+q2("(i)", "\\dfrac{1}{4}", "-1", ["x^2-\\left(\\dfrac{1}{4}\\right)x+(-1)", "x^2-\\dfrac{x}{4}-1"], 4, "4x^2-x-4")
+q2("(ii)", "\\sqrt{2}", "\\dfrac{1}{3}", ["x^2-\\sqrt{2}\\,x+\\dfrac{1}{3}"], 3, "3x^2-3\\sqrt{2}\\,x+1")
 q2("(iii)", "0", "\\sqrt{5}", ["x^2-0\\cdot x+\\sqrt{5}"], None, "x^2+\\sqrt{5}")
 q2("(iv)", "1", "1", ["x^2-1\\cdot x+1"], None, "x^2-x+1")
-q2("(v)", "-\\dfrac{1}{4}", "\\dfrac{1}{4}", ["x^2-\\left(-\\dfrac{1}{4}\\right)x+\\dfrac{1}{4}", "x^2+\\dfrac{x}{4}+\\dfrac{1}{4}", "\\dfrac{4x^2+x+1}{4}"], 4, "4x^2+x+1")
+q2("(v)", "-\\dfrac{1}{4}", "\\dfrac{1}{4}", ["x^2-\\left(-\\dfrac{1}{4}\\right)x+\\dfrac{1}{4}", "x^2+\\dfrac{x}{4}+\\dfrac{1}{4}"], 4, "4x^2+x+1")
 q2("(vi)", "4", "1", ["x^2-4x+1"], None, "x^2-4x+1")
 b = QF + "".join(part(lab, body) for lab, body, _ in R)
 b += ans(", ".join(f"{lab} {m(fin)}" for lab, _, fin in R))
