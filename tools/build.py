@@ -272,6 +272,9 @@ def build():
             ppath = f"/{lang}/papers/{p['slug']}/"
             d = p[lang]
             b = "<ul>" + "".join(f"<li>{e(x)}</li>" for x in d.get("summary", [])) + "</ul>"
+            if d.get("disclaimer"):
+                b = ('<div style="background:#fff5e6;border-left:4px solid #f08c00;padding:10px 14px;border-radius:8px;margin:12px 0">'
+                     f'<b>⚠️ अस्वीकरण:</b> {e(d["disclaimer"])}</div>') + b
             b += (f'<div class="btns"><a class="btn" href="{e(d["pdf"])}">{e(t["pdf_view"])}</a>'
                   f'<a class="btn ghost" href="{e(d["pdf"])}" download>{e(t["pdf_dl"])}</a></div>')
             other = "en" if lang == "hi" else "hi"
