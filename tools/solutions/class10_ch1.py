@@ -40,8 +40,19 @@ def ladders(*ns):
     return "<div class='lads'>" + "".join(ladder(n) for n in ns) + "</div>"
 
 
+def mcell(c):
+    """A cell with no Hindi text is typeset wholly in TeX, so letters, powers and roots match."""
+    import re
+    c = str(c)
+    if not c or re.search(r"[\u0900-\u097F]", c):
+        return c
+    t = tex(c).replace("²", "^2").replace("<sup>", "^{").replace("</sup>", "}")
+    return "\\(" + t + "\\)"
+
+
 def lines(head, *rest):
-    """Head on its own line, then one '=' per line."""
+    """First line 'LHS = RHS', then each further '= ...' aligned under the first '='."""
+    head, rest = mcell(head), [mcell(r) for r in rest]
     if not rest:
         return f"<div class='eq'><span class='l'>{head}</span></div>"
     out = f"<span class='l'>{head}</span><span class='s'>=</span><span class='r'>{rest[0]}</span>"
@@ -49,12 +60,28 @@ def lines(head, *rest):
     return "<div class='eq'>" + out + "</div>"
 
 
+def tex(s):
+    return str(s).replace("\\(", "").replace("\\)", "").replace("−", "-").replace("×", "\\times ")
+
+
 def sq(x):
-    return f"√<span class='ov'>{x}</span>"
+    return f"\\(\\sqrt{{{x}}}\\)"
 
 
 def fr(a, b):
-    return f"<span class='fr'><span>{a}</span><span>{b}</span></span>"
+    return f"\\(\\dfrac{{{tex(a)}}}{{{tex(b)}}}\\)"
+
+
+def render_math(doc):
+    """Pre-render every \\( ... \\) with KaTeX (server side, no JS on the page)."""
+    import re, json, subprocess
+    parts = re.findall(r"\\\((.+?)\\\)", doc)
+    if not parts:
+        return doc
+    out = subprocess.run(["node", str(ROOT / "tools" / "katex_render.js")], input=json.dumps(parts),
+                         capture_output=True, text=True, check=True).stdout
+    it = iter(json.loads(out))
+    return re.sub(r"\\\((.+?)\\\)", lambda m: next(it), doc)
 
 
 def given(k, f):
@@ -230,7 +257,7 @@ main{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:14px}
 .vt{font-weight:700;margin-top:8px}.ok{color:#0f7a4c;font-weight:600}
 .ans{background:#e6f7ee;border:2px solid #6cc596;border-radius:12px;padding:10px 12px;margin-top:12px}.ans b{color:#0f7a4c}
 .thm{background:#f4ecff;border:1px dashed #a77bf3;border-radius:10px;padding:8px 12px;margin:8px 0;font-size:15.5px}
-.ov{text-decoration:overline}
+.katex{font-size:1.12em}
 .fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.15;margin:0 3px}
 .fr span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
 .btns{display:flex;justify-content:space-between;gap:10px;margin:22px 0 6px}
@@ -250,7 +277,7 @@ def page(slug, title, sub, qs, prev, nxt):
 <html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>कक्षा 10 गणित {e(title)} हल | MP Board हल</title>
 <meta name="description" content="कक्षा 10 गणित अध्याय 1 वास्तविक संख्याएँ, {e(title)} के सभी प्रश्नों के चरणबद्ध हल।">
-<style>{CSS}</style></head><body>
+<link rel="stylesheet" href="/assets/katex/katex.min.css"><style>{CSS}</style></head><body>
 <header class="top"><a class="brand" href="/hi/">MP Board हल</a><a class="sw" href="/en/class-10/maths/chapter-01/">English Medium</a></header>
 <main><nav class="crumbs"><a href="/hi/">होम</a> › <a href="/hi/class-10/">कक्षा 10</a> › <a href="/hi/class-10/maths/">गणित</a> › <a href="{BASE}">अध्याय 1</a> › <span>{e(title)}</span></nav>
 <div class="hero"><h1>{e(title)} के हल</h1><p>{e(sub)}</p></div>
@@ -261,7 +288,7 @@ def page(slug, title, sub, qs, prev, nxt):
 """
     out = ROOT / "site" / BASE.strip("/") / slug / "index.html"
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(doc, encoding="utf-8")
+    out.write_text(render_math(doc), encoding="utf-8")
 
 
 page("exercise-1-1", "प्रश्नावली 1.1", "कक्षा 10 गणित · अध्याय 1: वास्तविक संख्याएँ · 7 प्रश्न", EX11,
