@@ -118,6 +118,11 @@ for p in sorted(root.rglob("*.html")):
     s = s.replace("</title>", "</title>" + block, 1) if "</title>" in s else s.replace("</head>", block + "</head>", 1)
     # accessible names for graphs/figures that have no label yet
     s = re.sub(r"<svg(?![^>]*aria-label)(?![^>]*aria-hidden)([^>]*class='graph')", r"<svg role='img' aria-label='आलेख'\1", s)
+    s = re.sub(r"<!--foot-->.*?<!--/foot-->", "", s, flags=re.S)
+    links = ('<!--foot--><nav class="footlinks" style="display:block;margin-bottom:6px;font-size:13px;line-height:2"><a href="/hi/about/">हमारे बारे में</a> · <a href="/hi/author/">लेखक</a> · '
+             '<a href="/hi/contact/">संपर्क</a> · <a href="/hi/privacy/">गोपनीयता नीति</a> · <a href="/hi/disclaimer/">अस्वीकरण</a> · '
+             '<a href="/hi/terms/">उपयोग की शर्तें</a></nav><!--/foot-->')
+    s = re.sub(r"(<footer[^>]*>)", lambda m: m.group(1) + links, s, count=1)
     p.write_text(s, encoding="utf-8")
 
 sm = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
