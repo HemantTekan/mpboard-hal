@@ -189,7 +189,8 @@ def q2(lab, S, Pp, steps, k, final):
     body += lines("p(x)", *steps)
     if k:
         body += f"<p>भिन्न हटाने के लिए k = {k} लेने पर</p>"
-    body += lines("p(x)", final)
+    if steps[-1] != final:
+        body += lines("p(x)", final)
     body += therefore("अतः अभीष्ट द्विघात बहुपद " + m(final) + " है।")
     R.append((lab, body, final))
 
