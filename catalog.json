@@ -619,7 +619,19 @@
         "hi": "वृत्तों से संबंधित क्षेत्रफल",
         "en": "Areas Related to Circles"
        },
-       "items": []
+       "items": [
+        {
+         "slug": "exercise-11-1",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 11.1",
+          "en": "Exercise 11.1"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-11/exercise-11-1/"
+         }
+        }
+       ]
       },
       {
        "num": 12,
