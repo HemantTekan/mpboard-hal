@@ -3,123 +3,12 @@
 Writes colourful, responsive, self-contained HTML pages into site/.
 Run from repo root: python3 tools/solutions/class10_ch1.py
 """
-import pathlib, html, sys
+import sys, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-import common  # noqa
+from common import *  # noqa
 
-ROOT = pathlib.Path(__file__).resolve().parents[2]
 BASE = "/hi/class-10/maths/chapter-01/"
-X = " × "
-
-
-def e(s):
-    return html.escape(str(s))
-
-
-def factors(n):
-    out, d = [], 2
-    while n > 1:
-        while n % d == 0:
-            out.append(d)
-            n //= d
-        d += 1
-    return out
-
-
-def ladder(n):
-    """Division ladder as an HTML table, plus the one-line factorisation."""
-    rows, m = [], n
-    for p in factors(n):
-        rows.append(f"<tr><td class='d'>{p}</td><td>{m}</td></tr>")
-        m //= p
-    rows.append("<tr><td class='d'></td><td>1</td></tr>")
-    return (f"<div class='lad'><div class='lt'>{n} के अभाज्य गुणनखंड:</div>"
-            f"<table class='ladder'>{''.join(rows)}</table>"
-            f"<div class='fl'>{n} = {X.join(map(str, factors(n)))}</div></div>")
-
-
-def ladders(*ns):
-    return "<div class='lads'>" + "".join(ladder(n) for n in ns) + "</div>"
-
-
-def mcell(c):
-    """A cell with no Hindi text is typeset wholly in TeX, so letters, powers and roots match."""
-    import re
-    c = str(c)
-    if not c or re.search(r"[\u0900-\u097F]", c):
-        return c
-    t = tex(c).replace("²", "^2").replace("<sup>", "^{").replace("</sup>", "}")
-    return "\\(" + t + "\\)"
-
-
-def lines(head, *rest):
-    """First line 'LHS = RHS', then each further '= ...' aligned under the first '='."""
-    head, rest = mcell(head), [mcell(r) for r in rest]
-    if not rest:
-        return f"<div class='eq'><span class='l'>{head}</span></div>"
-    out = f"<span class='l'>{head}</span><span class='s'>=</span><span class='r'>{rest[0]}</span>"
-    out += "".join(f"<span class='l'></span><span class='s'>=</span><span class='r'>{r}</span>" for r in rest[1:])
-    return "<div class='eq'>" + out + "</div>"
-
-
-def tex(s):
-    return str(s).replace("\\(", "").replace("\\)", "").replace("−", "-").replace("×", "\\times ")
-
-
-def sq(x):
-    return f"\\(\\sqrt{{{x}}}\\)"
-
-
-def fr(a, b):
-    return f"\\(\\dfrac{{{tex(a)}}}{{{tex(b)}}}\\)"
-
-
-def render_math(doc):
-    """Pre-render every \\( ... \\) with KaTeX (server side, no JS on the page)."""
-    import re, json, subprocess
-    parts = re.findall(r"\\\((.+?)\\\)", doc)
-    if not parts:
-        return doc
-    out = subprocess.run(["node", str(ROOT / "tools" / "katex_render.js")], input=json.dumps(parts),
-                         capture_output=True, text=True, check=True).stdout
-    it = iter(json.loads(out))
-    return re.sub(r"\\\((.+?)\\\)", lambda m: next(it), doc)
-
-
-def given(k, f):
-    return (f"<div class='gv'><div class='box k'><b>ज्ञात है</b><div>{k}</div></div>"
-            f"<div class='box f'><b>ज्ञात करना है</b><div>{f}</div></div></div>")
-
-
-def ans(t):
-    return common.ans(t)
-
-
-def q(num, text, body, color):
-    return (f"<section class='q c{color}' id='q{num}'><div class='qh'><span class='qn'>प्रश्न {num}</span>"
-            f"<p>{text}</p></div><div class='qb'>{body}</div></section>")
-
-
-def part(label, body):
-    return f"<div class='part'><div class='pl'>{label}</div>{body}</div>"
-
-
-def lcm_hcf(nums, hcf_f, hcf_v, lcm_f, lcm_v, verify=False):
-    b = ladders(*nums)
-    import math
-    from functools import reduce
-    assert reduce(math.gcd, nums) == hcf_v and math.prod(hcf_f) == hcf_v
-    assert reduce(lambda x, y: x * y // math.gcd(x, y), nums) == lcm_v and math.prod(lcm_f) == lcm_v
-    b += lines("HCF", str(hcf_v)) if len(hcf_f) == 1 else lines("HCF", X.join(map(str, hcf_f)), str(hcf_v))
-    b += lines("LCM", X.join(map(str, lcm_f)), str(lcm_v))
-    if verify:
-        a, c = nums
-        b += "<div class='vt'>जाँच:</div>"
-        b += lines("HCF × LCM", f"{hcf_v} × {lcm_v}", f"{hcf_v * lcm_v}")
-        b += lines("दोनों संख्याओं का गुणनफल", f"{a} × {c}", f"{a * c}")
-        assert hcf_v * lcm_v == a * c
-        b += "<p class='ok'>अतः HCF × LCM = दोनों संख्याओं का गुणनफल ✔</p>"
-    return b
+CH = "वास्तविक संख्याएँ"
 
 
 # ---------------- Exercise 1.1 ----------------
@@ -219,7 +108,8 @@ b += part(f"(iii) 6 + {sq(2)}", p)
 Q.append((f"सिद्ध कीजिए कि निम्नलिखित संख्याएँ अपरिमेय हैं: (i) {fr('1', sq(2))} (ii) 7{sq(5)} (iii) 6 + {sq(2)}", b))
 EX12 = Q
 
-CSS = """
+# Chapter 1 keeps the earlier version of the stylesheet so its pages stay exactly as published.
+CH1_CSS = """
 :root{--ink:#1d2433;--muted:#5d6676;--pri:#1f5aa6}
 *{box-sizing:border-box}
 body{margin:0;font-family:"Noto Sans Devanagari","Mangal",system-ui,sans-serif;color:var(--ink);line-height:1.65;font-size:17px;
@@ -271,33 +161,8 @@ footer{position:relative;z-index:1;text-align:center;color:var(--muted);font-siz
 """
 
 
-def page(slug, title, sub, qs, prev, nxt):
-    body = "".join(q(i + 1, t, b, i % 6) for i, (t, b) in enumerate(qs))
-    jump = "".join(f"<a href='#q{i + 1}'>प्र. {i + 1}</a>" for i in range(len(qs)))
-    pv = f"<a href='{prev[0]}'>← {e(prev[1])}</a>" if prev else "<span></span>"
-    nx = f"<a href='{nxt[0]}'>{e(nxt[1])} →</a>" if nxt else "<span></span>"
-    doc = f"""<!doctype html>
-<html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>कक्षा 10 गणित {e(title)} हल | MP Board हल</title>
-<meta name="description" content="कक्षा 10 गणित अध्याय 1 वास्तविक संख्याएँ, {e(title)} के सभी प्रश्नों के चरणबद्ध हल — MP Board, NCERT और CBSE के लिए, हिंदी माध्यम।">
-<meta name="keywords" content="MP Board, MPBSE, NCERT, CBSE, कक्षा 10, गणित, हल, हिंदी माध्यम">
-<link rel="stylesheet" href="/assets/katex/katex.min.css"><style>{CSS}</style></head><body>
-<header class="top"><a class="brand" href="/hi/">MP Board हल</a><a class="sw" href="/en/class-10/maths/chapter-01/">English Medium</a></header>
-<main><nav class="crumbs"><a href="/hi/">होम</a> › <a href="/hi/class-10/">कक्षा 10</a> › <a href="/hi/class-10/maths/">गणित</a> › <a href="{BASE}">अध्याय 1</a> › <span>{e(title)}</span></nav>
-<div class="hero"><h1>{e(title)} के हल</h1><p>{e(sub)}</p></div>
-<div class="jump">{jump}</div>
-{body}
-<div class="btns">{pv}{nx}</div>
-<p class="boards" style="font-size:14px;color:#555;margin:18px 0">यह हल <b>MP Board (MPBSE)</b>, <b>NCERT</b> और <b>CBSE</b> — तीनों के कक्षा 10 गणित के विद्यार्थियों के लिए उपयोगी है, क्योंकि तीनों में गणित की पाठ्यपुस्तक NCERT की ही है।</p>
-</main><footer>© educationdew.com · MP Board, NCERT और CBSE पाठ्यपुस्तकों के चरणबद्ध हल</footer></body></html>
-"""
-    out = ROOT / "site" / BASE.strip("/") / slug / "index.html"
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(render_math(doc), encoding="utf-8")
-
-
-page("exercise-1-1", "प्रश्नावली 1.1", "कक्षा 10 गणित · अध्याय 1: वास्तविक संख्याएँ · 7 प्रश्न", EX11,
-     (BASE, "अध्याय 1"), (BASE + "exercise-1-2/", "प्रश्नावली 1.2"))
-page("exercise-1-2", "प्रश्नावली 1.2", "कक्षा 10 गणित · अध्याय 1: वास्तविक संख्याएँ · 3 प्रश्न", EX12,
-     (BASE + "exercise-1-1/", "प्रश्नावली 1.1"), (BASE, "अध्याय 1"))
+page(BASE, 1, CH, "exercise-1-1", "प्रश्नावली 1.1", "कक्षा 10 गणित · अध्याय 1: वास्तविक संख्याएँ · 7 प्रश्न", EX11,
+     (BASE, "अध्याय 1"), (BASE + "exercise-1-2/", "प्रश्नावली 1.2"), css=CH1_CSS)
+page(BASE, 1, CH, "exercise-1-2", "प्रश्नावली 1.2", "कक्षा 10 गणित · अध्याय 1: वास्तविक संख्याएँ · 3 प्रश्न", EX12,
+     (BASE + "exercise-1-1/", "प्रश्नावली 1.1"), (BASE, "अध्याय 1"), css=CH1_CSS)
 print("ok")

@@ -2,108 +2,15 @@
 """Class 10 Maths, Chapter 11 (वृत्तों से संबंधित क्षेत्रफल): Exercise 11.1 (rationalised), Hindi medium.
 Run from repo root: python3 tools/solutions/class10_ch11.py
 """
-import sys, pathlib, re as _re
+import sys, pathlib, math
 from fractions import Fraction as F
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from common import *  # noqa
-from common import _LAB
+from mixed_cells import *  # noqa  (mc, lines, eqs for mixed Hindi/TeX cells)
+from geometry import *  # noqa
 
 BASE = "/hi/class-10/maths/chapter-11/"
 CH = "वृत्तों से संबंधित क्षेत्रफल"
-_DEV = _re.compile(r"[\u0900-\u097F]")
-
-
-def mc(c):
-    c = str(c)
-    if not _DEV.search(c):
-        return mcell(c)
-    out = []
-    for i, piece in enumerate(_re.split(r"\\text\{([^}]*)\}", c)):
-        if i % 2:
-            out.append(piece)
-        elif piece.strip().strip("\\").strip():
-            out.append("\\(" + piece.strip().rstrip("\\").strip() + "\\)")
-    return " ".join(out)
-
-
-def lines(head, *rest):
-    head, rest = mc(head), [mc(r) for r in rest]
-    out = f"<span class='l'>{head}</span><span class='s'>=</span><span class='r'>{rest[0]}</span>"
-    out += "".join(f"<span class='l'></span><span class='s'>=</span><span class='r'>{r}</span>" for r in rest[1:])
-    return "<div class='eq'>" + out + "</div>"
-
-
-def eqs(*pairs):
-    rows = "".join(f"<span class='l'>{mc(a)}</span><span class='s'>=</span><span class='r'>{mc(b)}</span>" for a, b in pairs)
-    return "<div class='eq'>" + rows + "</div>"
-
-
-def p(t):
-    return f"<p>{t}</p>"
-
-
-def ok(t):
-    return f"<p class='ok'>{t}</p>"
-
-
-def qt(t):
-    marks = [mm.start() for mm in _LAB.finditer(t)]
-    if len(marks) < 2:
-        return t
-    pre = t[:marks[0]].strip()
-    segs = [t[x:y].strip() for x, y in zip(marks, marks[1:] + [len(t)])]
-    return pre + "".join(f"<span style='display:block;font-weight:500;margin-top:4px'>{x}</span>" for x in segs)
-
-
-def gp(dia, sid, extra=None):
-    """दिया है / सिद्ध करना है boxes."""
-    h = (f"<div class='gv'><div class='box k'><b>दिया है</b><div>{dia}</div></div>"
-         f"<div class='box f'><b>{'सिद्ध करना है' if extra is None else extra}</b><div>{sid}</div></div></div>")
-    return h
-
-
-def pf(*rows):
-    """उपपत्ति: each row is (statement, reason); the reason sits on its own small line."""
-    out = "<div class='vt'>उपपत्ति:</div><div style='margin:6px 0 4px'>"
-    for st, rs in rows:
-        out += ("<div style='padding:6px 0;border-bottom:1px dashed #e3e7f3'>"
-                f"<div>{st}</div>" + (f"<div style='font-size:.88em;color:#5a6275'>({rs})</div>" if rs else "") + "</div>")
-    return out + "</div>"
-
-
-def r(a, b):
-    return m(f"\\dfrac{{{a}}}{{{b}}}")
-
-
-def T(x):
-    return m("\\triangle " + x)
-
-
-def A(x):
-    return m("\\angle " + x)
-
-
-def fig(W, H, pts, segs, dashed=(), labels=(), extra="", caption=""):
-    """Small geometry figure. pts: name -> (x, y, dx, dy) where (dx, dy) shifts the letter."""
-    g = [f"<svg class='graph' viewBox='0 0 {W} {H}' role='img' aria-label='{caption or 'आकृति'}' style='max-width:{min(W, 340)}px'>"]
-    for a, b in segs:
-        (x1, y1, *_), (x2, y2, *_) = pts[a], pts[b]
-        g.append(f"<line x1='{x1}' y1='{y1}' x2='{x2}' y2='{y2}' stroke='#1d3a8a' stroke-width='2'/>")
-    for a, b in dashed:
-        (x1, y1, *_), (x2, y2, *_) = pts[a], pts[b]
-        g.append(f"<line x1='{x1}' y1='{y1}' x2='{x2}' y2='{y2}' stroke='#c2410c' stroke-width='1.8' stroke-dasharray='5 4'/>")
-    g.append(extra)
-    for n, (x, y, dx, dy) in pts.items():
-        g.append(f"<circle cx='{x}' cy='{y}' r='2.6' fill='#1d3a8a'/><text x='{x + dx}' y='{y + dy}' font-size='15' font-weight='700' fill='#111' text-anchor='middle'>{n}</text>")
-    for x, y, t in labels:
-        g.append(f"<text x='{x}' y='{y}' font-size='12.5' fill='#b4232a' text-anchor='middle'>{t}</text>")
-    g.append("</svg>")
-    cap = f"<div style='font-size:.85em;color:#5a6275;margin-top:2px'>{caption}</div>" if caption else ""
-    return "<div style='margin:8px 0'>" + "".join(g) + cap + "</div>"
-
-
-import math
-from fractions import Fraction as F
 
 
 def close(a, b, t=1e-9):

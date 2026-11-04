@@ -11,20 +11,6 @@ BASE = "/hi/class-10/maths/chapter-03/"
 CH = "दो चर वाले रैखिक समीकरण युग्म"
 
 
-def eqs(*pairs):
-    """Separate equations, one per row, aligned at '='."""
-    rows = "".join(f"<span class='l'>{mcell(a)}</span><span class='s'>=</span><span class='r'>{mcell(b)}</span>" for a, b in pairs)
-    return "<div class='eq'>" + rows + "</div>"
-
-
-def ok(t):
-    return f"<p class='ok'>{t}</p>"
-
-
-def p(t):
-    return f"<p>{t}</p>"
-
-
 def tag(t, n):
     """Equation with its number, e.g. x + y = 10 ....(1)"""
     l, r = t.split("=")
@@ -147,8 +133,6 @@ EXTRA_CSS = """
 .sq{display:flex;gap:8px;margin:4px 0}.sl{flex:none;min-width:2.2em}.stk{display:inline-block}
 .rt{border-collapse:collapse;margin:6px 0 10px;font-size:15.5px}.rt td,.rt th{border:1.5px solid #c6cde0;padding:4px 10px;text-align:center}.rt th{background:#eef2fa}
 """
-import common  # noqa
-common.CSS = common.CSS + EXTRA_CSS
 
 RULE = formula("अनुपातों की तुलना",
                "युग्म " + m("a_1x+b_1y+c_1=0") + " और " + m("a_2x+b_2y+c_2=0") + " के लिए:",
@@ -769,9 +753,9 @@ assert solve(1, -1, -1, 3, 2, 12) == (2, 3)
 assert solve(1, -1, 4, 1, 1, 36) == (20, 16)
 
 page(BASE, 3, CH, "exercise-3-1", "प्रश्नावली 3.1", "कक्षा 10 गणित · अध्याय 3: दो चर वाले रैखिक समीकरण युग्म · 7 प्रश्न (ग्राफीय विधि, आलेख सहित)", EX31,
-     (BASE, "अध्याय 3"), (BASE + "exercise-3-2/", "प्रश्नावली 3.2"))
+     (BASE, "अध्याय 3"), (BASE + "exercise-3-2/", "प्रश्नावली 3.2"), css=CSS + EXTRA_CSS)
 page(BASE, 3, CH, "exercise-3-2", "प्रश्नावली 3.2", "कक्षा 10 गणित · अध्याय 3: दो चर वाले रैखिक समीकरण युग्म · 3 प्रश्न (प्रतिस्थापन विधि)", EX32,
-     (BASE + "exercise-3-1/", "प्रश्नावली 3.1"), (BASE + "exercise-3-3/", "प्रश्नावली 3.3"))
+     (BASE + "exercise-3-1/", "प्रश्नावली 3.1"), (BASE + "exercise-3-3/", "प्रश्नावली 3.3"), css=CSS + EXTRA_CSS)
 page(BASE, 3, CH, "exercise-3-3", "प्रश्नावली 3.3", "कक्षा 10 गणित · अध्याय 3: दो चर वाले रैखिक समीकरण युग्म · 2 प्रश्न (विलोपन विधि)", EX33,
-     (BASE + "exercise-3-2/", "प्रश्नावली 3.2"), (BASE, "अध्याय 3"))
+     (BASE + "exercise-3-2/", "प्रश्नावली 3.2"), (BASE, "अध्याय 3"), css=CSS + EXTRA_CSS)
 print("ok")

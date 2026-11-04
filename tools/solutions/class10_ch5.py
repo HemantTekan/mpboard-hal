@@ -6,66 +6,14 @@ import sys, pathlib
 from fractions import Fraction as F
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from common import *  # noqa
-from common import _LAB
+from mixed_cells import *  # noqa  (mc, lines, eqs for mixed Hindi/TeX cells)
 
 BASE = "/hi/class-10/maths/chapter-05/"
 CH = "समांतर श्रेढ़ियाँ"
 
 
-def eqs(*pairs):
-    rows = "".join(f"<span class='l'>{mcell(a)}</span><span class='s'>=</span><span class='r'>{mcell(b)}</span>" for a, b in pairs)
-    return "<div class='eq'>" + rows + "</div>"
-
-
-import re as _re
-_DEV = _re.compile(r"[\u0900-\u097F]")
-
-
-def mc(c):
-    """Cell that may mix Hindi \\text{..} with maths: Hindi stays plain text, the rest is TeX."""
-    c = str(c)
-    if not _DEV.search(c):
-        return mcell(c)
-    out = []
-    for i, piece in enumerate(_re.split(r"\\text\{([^}]*)\}", c)):
-        if i % 2:
-            out.append(piece)
-        elif piece.strip().strip("\\").strip():
-            out.append("\\(" + piece.strip().rstrip("\\").strip() + "\\)")
-    return " ".join(out)
-
-
-def lines(head, *rest):
-    head, rest = mc(head), [mc(r) for r in rest]
-    out = f"<span class='l'>{head}</span><span class='s'>=</span><span class='r'>{rest[0]}</span>"
-    out += "".join(f"<span class='l'></span><span class='s'>=</span><span class='r'>{r}</span>" for r in rest[1:])
-    return "<div class='eq'>" + out + "</div>"
-
-
-def eqs(*pairs):
-    rows = "".join(f"<span class='l'>{mc(a)}</span><span class='s'>=</span><span class='r'>{mc(b)}</span>" for a, b in pairs)
-    return "<div class='eq'>" + rows + "</div>"
-
-
-def ok(t):
-    return f"<p class='ok'>{t}</p>"
-
-
-def p(t):
-    return f"<p>{t}</p>"
-
-
 def jch(*blocks):
     return "<div class='vt'>जाँच:</div>" + "".join(blocks) + ok("✔")
-
-
-def qt(t):
-    marks = [mm.start() for mm in _LAB.finditer(t)]
-    if len(marks) < 2:
-        return t
-    pre = t[:marks[0]].strip()
-    segs = [t[x:y].strip() for x, y in zip(marks, marks[1:] + [len(t)])]
-    return pre + "".join(f"<span style='display:block;font-weight:500;margin-top:4px'>{x}</span>" for x in segs)
 
 
 def an(a, d, n):

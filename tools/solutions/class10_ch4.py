@@ -6,24 +6,9 @@ import sys, pathlib, math
 from fractions import Fraction as F
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from common import *  # noqa
-from common import _LAB
 
 BASE = "/hi/class-10/maths/chapter-04/"
 CH = "द्विघात समीकरण"
-
-
-def eqs(*pairs):
-    """Separate equations, one per row, aligned at '='."""
-    rows = "".join(f"<span class='l'>{mcell(a)}</span><span class='s'>=</span><span class='r'>{mcell(b)}</span>" for a, b in pairs)
-    return "<div class='eq'>" + rows + "</div>"
-
-
-def ok(t):
-    return f"<p class='ok'>{t}</p>"
-
-
-def p(t):
-    return f"<p>{t}</p>"
 
 
 def roots_of(a, b, c):
@@ -383,15 +368,6 @@ s += eqs(("लंबाई", "20\\ \\text{m}"), ("चौड़ाई", "40-20=20
 s += "<div class='vt'>जाँच:</div>" + lines("2(20+20)", "80") + lines("20\\times 20", "400") + ok("✔")
 s += ans("हाँ, संभव है। लंबाई 20 m और चौड़ाई 20 m (पार्क वर्गाकार होगा)")
 EX43.append(("क्या परिमाप 80 m तथा क्षेत्रफल 400 m² के एक पार्क को बनाना संभव है? यदि है, तो उसकी लंबाई और चौड़ाई ज्ञात कीजिए।", s))
-
-def qt(t):
-    """Question text: each labelled sub-part (i), (ii)... on its own line (user rule)."""
-    marks = [mm.start() for mm in _LAB.finditer(t)]
-    if len(marks) < 2:
-        return t
-    pre = t[:marks[0]].strip()
-    segs = [t[x:y].strip() for x, y in zip(marks, marks[1:] + [len(t)])]
-    return pre + "".join(f"<span style='display:block;font-weight:500;margin-top:4px'>{x}</span>" for x in segs)
 
 
 EX41, EX42, EX43 = ([(qt(t), b_) for t, b_ in L] for L in (EX41, EX42, EX43))

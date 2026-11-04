@@ -11,12 +11,6 @@ BASE = "/hi/class-10/maths/chapter-02/"
 CH = "बहुपद"
 
 
-def eqs(*pairs):
-    """Separate equations, one per row, aligned at '='."""
-    rows = "".join(f"<span class='l'>{mcell(a)}</span><span class='s'>=</span><span class='r'>{mcell(b)}</span>" for a, b in pairs)
-    return "<div class='eq'>" + rows + "</div>"
-
-
 def therefore(t):
     return f"<p class='ok'>{t}</p>"
 

@@ -1,6 +1,12 @@
-import re
 #!/usr/bin/env python3
-"""Shared helpers for Hindi solution pages (colourful, responsive, KaTeX pre-rendered)."""
+"""Shared helpers for the Hindi solution pages (colourful, responsive, KaTeX pre-rendered).
+
+Every chapter generator does `from common import *` and then only adds its own content.
+Sections below: text/number helpers, maths cells, question layout, page template.
+Chapters whose equation cells mix Hindi with TeX also import `mixed_cells`; geometry
+chapters import `geometry` (proof boxes and SVG figures).
+"""
+import re
 import pathlib, html
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -127,7 +133,6 @@ def lcm_hcf(nums, hcf_f, hcf_v, lcm_f, lcm_v, verify=False):
     return b
 
 
-
 def m(t):
     """Inline TeX."""
     return "\\(" + t + "\\)"
@@ -143,6 +148,35 @@ def formula(name, t, items=None):
 
 def note(t):
     return f"<p>{t}</p>"
+
+
+def p(t):
+    return f"<p>{t}</p>"
+
+
+def ok(t):
+    return f"<p class='ok'>{t}</p>"
+
+
+def eqs(*pairs):
+    """Separate equations, one per row, aligned at '='."""
+    rows = "".join(f"<span class='l'>{mcell(a)}</span><span class='s'>=</span><span class='r'>{mcell(b)}</span>" for a, b in pairs)
+    return "<div class='eq'>" + rows + "</div>"
+
+
+def qt(t):
+    """Question text: each labelled sub-part (i), (ii)... on its own line (user rule)."""
+    marks = [mm.start() for mm in _LAB.finditer(t)]
+    if len(marks) < 2:
+        return t
+    pre = t[:marks[0]].strip()
+    segs = [t[x:y].strip() for x, y in zip(marks, marks[1:] + [len(t)])]
+    return pre + "".join(f"<span style='display:block;font-weight:500;margin-top:4px'>{x}</span>" for x in segs)
+
+
+def close(a, b):
+    """Assert two computed values agree (used to check answers while generating)."""
+    assert abs(a - b) < 1e-9, (a, b)
 
 
 CSS = """
@@ -200,8 +234,11 @@ footer{position:relative;z-index:1;text-align:center;color:var(--muted);font-siz
 """
 
 
-
-def page(BASE, chnum, chname, slug, title, sub, qs, prev, nxt):
+def page(BASE, chnum, chname, slug, title, sub, qs, prev, nxt, css=None):
+    """Write site/<BASE>/<slug>/index.html for one exercise.
+    qs: list of (question text, solution html); prev/nxt: (href, label) or None.
+    css: page stylesheet; defaults to CSS above (chapters may pass CSS + extra rules)."""
+    css = CSS if css is None else css
     body = "".join(q(i + 1, t, b, i % 6) for i, (t, b) in enumerate(qs))
     jump = "".join(f"<a href='#q{i + 1}'>प्र. {i + 1}</a>" for i in range(len(qs)))
     pv = f"<a href='{prev[0]}'>← {e(prev[1])}</a>" if prev else "<span></span>"
@@ -211,7 +248,7 @@ def page(BASE, chnum, chname, slug, title, sub, qs, prev, nxt):
 <title>कक्षा 10 गणित {e(title)} हल | MP Board हल</title>
 <meta name="description" content="कक्षा 10 गणित अध्याय {chnum} {e(chname)}, {e(title)} के सभी प्रश्नों के चरणबद्ध हल — MP Board, NCERT और CBSE के लिए, हिंदी माध्यम।">
 <meta name="keywords" content="MP Board, MPBSE, NCERT, CBSE, कक्षा 10, गणित, हल, हिंदी माध्यम">
-<link rel="stylesheet" href="/assets/katex/katex.min.css"><style>{CSS}</style></head><body>
+<link rel="stylesheet" href="/assets/katex/katex.min.css"><style>{css}</style></head><body>
 <header class="top"><a class="brand" href="/hi/">MP Board हल</a><a class="sw" href="/en{BASE[3:]}">English Medium</a></header>
 <main><nav class="crumbs"><a href="/hi/">होम</a> › <a href="/hi/class-10/">कक्षा 10</a> › <a href="/hi/class-10/maths/">गणित</a> › <a href="{BASE}">अध्याय {chnum}</a> › <span>{e(title)}</span></nav>
 <div class="hero"><h1>{e(title)} के हल</h1><p>{e(sub)}</p></div>
@@ -224,5 +261,3 @@ def page(BASE, chnum, chname, slug, title, sub, qs, prev, nxt):
     out = ROOT / "site" / BASE.strip("/") / slug / "index.html"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(render_math(doc), encoding="utf-8")
-
-
