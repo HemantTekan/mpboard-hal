@@ -568,7 +568,19 @@
         "hi": "त्रिकोणमिति के कुछ अनुप्रयोग",
         "en": "Some Applications of Trigonometry"
        },
-       "items": []
+       "items": [
+        {
+         "slug": "exercise-9-1",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 9.1",
+          "en": "Exercise 9.1"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-09/exercise-9-1/"
+         }
+        }
+       ]
       },
       {
        "num": 10,
