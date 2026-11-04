@@ -104,10 +104,13 @@ for p in sorted(root.rglob("*.html")):
                 "about": {"@type": "Thing", "name": "गणित"},
                 "author": {"@type": "Organization", "name": AUTHOR, "url": BASE + "/"},
                 "keywords": "MP Board, MPBSE, NCERT, CBSE, गणित, हल",
-                "publisher": {"@type": "Organization", "name": SITE_NAME, "url": BASE + "/"},
+                "publisher": {"@type": "Organization", "name": SITE_NAME, "url": BASE + "/", "logo": {"@type": "ImageObject", "url": BASE + "/assets/icon-512.png"}},
                 "dateModified": lastmod(p),
             }
             ld.append(lr)
+        if rel in ("index.html", "hi/index.html"):
+            ld.append({"@context": "https://schema.org", "@type": "Organization", "name": "educationdew", "alternateName": SITE_NAME,
+                       "url": BASE + "/", "logo": BASE + "/assets/icon-512.png"})
         if rel == "hi/index.html":
             ld.append({"@context": "https://schema.org", "@type": "WebSite", "name": SITE_NAME, "url": BASE + "/hi/",
                        "inLanguage": "hi", "description": AUTHOR_DESC, "author": {"@type": "Organization", "name": AUTHOR, "url": BASE + "/"}})

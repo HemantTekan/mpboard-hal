@@ -12,6 +12,11 @@ L = {
                tag="Step-by-step maths solutions for MP Board, NCERT and CBSE, with diagrams and graphs.",
                chips=["✔ Every question solved", "✔ Diagrams & graphs", "✔ PDFs & quizzes"]),
 }
+ICONS = ('<link rel="icon" href="/favicon.ico" sizes="48x48">'
+         '<link rel="icon" type="image/svg+xml" href="/favicon.svg">'
+         '<link rel="icon" type="image/png" sizes="96x96" href="/assets/icon-96.png">'
+         '<link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png">'
+         '<link rel="apple-touch-icon" href="/apple-touch-icon.png"><meta name="theme-color" content="#0E7FA0">')
 HEAD_RE = re.compile(r'<header class="top">.*?</header>', re.S)
 SYM = "".join(f'<i style="left:{x}%;top:{y}%;font-size:{s}px">{c}</i>' for c, x, y, s in
               [("π", 4, 8, 54), ("√", 88, 10, 50), ("∑", 72, 62, 46), ("÷", 30, 70, 40), ("∞", 55, 6, 44), ("x²", 92, 70, 34), ("Δ", 16, 55, 36), ("θ", 64, 30, 30)])
@@ -72,10 +77,10 @@ def process(f):
     s = re.sub(r"<!--hero-->.*?<!--/hero-->", "", s, flags=re.S)
     if rel in ("/", "/hi/", "/en/"):
         s = s.replace("</header>", "</header>" + hero(lang, root=(rel == "/")), 1)
+    s = re.sub(r'<link rel="(?:icon|apple-touch-icon)"[^>]*>|<meta name="theme-color"[^>]*>', "", s)
     if "/assets/brand.css" not in s:
-        s = s.replace("</head>", '<link rel="stylesheet" href="/assets/brand.css">'
-                      '<link rel="icon" type="image/svg+xml" href="/assets/logo-mark.svg">'
-                      '<link rel="apple-touch-icon" href="/assets/logo-mark-192.png"><meta name="theme-color" content="#0E7FA0"></head>', 1)
+        s = s.replace("</head>", '<link rel="stylesheet" href="/assets/brand.css"></head>', 1)
+    s = s.replace("</head>", ICONS + "</head>", 1)
     f.write_text(s, encoding="utf-8")
     return True
 
