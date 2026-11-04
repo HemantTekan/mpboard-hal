@@ -21,7 +21,7 @@ T = {
                answers="उत्तर एक नज़र में", q="प्रश्न", prev="← पिछला", next="अगला →", papers="प्रश्नपत्र (हल सहित)",
                medium="हिंदी माध्यम", other="English Medium", inside="इसमें क्या है", open_quiz="क्विज़ शुरू करें",
                ready="उपलब्ध", items_none="इस अध्याय के हल जल्द आ रहे हैं।",
-               tag="MP Board और NCERT पाठ्यपुस्तकों के चरणबद्ध हल, चित्र सहित",
+               tag="MP Board, NCERT और CBSE पाठ्यपुस्तकों के चरणबद्ध हल, चित्र सहित",
                notes="नोट्स", quiz="क्विज़", exercises="प्रश्नावली के हल", subjects="विषय", sections="सामग्री के प्रकार",
                none_yet="अभी उपलब्ध नहीं, जल्द आ रहा है।", back_ch="← अध्याय पर लौटें"),
     "en": dict(home="Home", cls="Class", ch="Chapter", soon="Coming soon", choose_cls="Choose your class",
@@ -65,6 +65,16 @@ def class_has(c, lang):
         p["class"] == c["num"] and p.get(lang) for p in cat["papers"])
 
 
+def boards_note(lang, path):
+    m = re.search(r"/(?:class-(\d+)/maths/chapter-\d+/|papers/class-(\d+)-)", path)
+    if lang != "hi" or not m:
+        return ""
+    n = int(m.group(1) or m.group(2))
+    return ('<p class="boards" style="font-size:14px;color:#555;margin-top:18px">यह सामग्री <b>MP Board (MPBSE)</b>, '
+            f'<b>NCERT</b> और <b>CBSE</b> — तीनों के कक्षा {n} गणित के विद्यार्थियों के लिए उपयोगी है, '
+            'क्योंकि तीनों में गणित की पाठ्यपुस्तक NCERT की ही है। परीक्षा का प्रारूप बोर्ड के अनुसार अलग हो सकता है।</p>')
+
+
 def page(lang, path, title, crumbs, body, switch_to=None):
     t = T[lang]
     other = "en" if lang == "hi" else "hi"
@@ -80,13 +90,14 @@ def page(lang, path, title, crumbs, body, switch_to=None):
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{e(title)} | {e(site_name)}</title>
 <meta name="description" content="{e(title)} — {e(t['tag'])}">
+<meta name="keywords" content="MP Board, MPBSE, NCERT, CBSE, कक्षा 9, कक्षा 10, गणित, हल, हिंदी माध्यम">
 <link rel="stylesheet" href="/assets/style.css">
 </head><body>
 <header class="top"><a class="brand" href="/{lang}/">{e(site_name)}</a>
 <a class="switch" href="{e(sw)}">{e(t['other'])}</a></header>
 <main>{crumb_html}
 <h1>{e(title)}</h1>
-{body}
+{body}{"" if T[lang]["items_none"] in body or T[lang]["soon"] in body else boards_note(lang, path)}
 </main>
 <footer>© {e(cat['site']['author'][lang])} · {e(t['tag'])}</footer>
 </body></html>
@@ -305,6 +316,7 @@ def build():
 INFO = [
     ("about", "हमारे बारे में", "MP Board हल क्या है, किसके लिए है और यहाँ की सामग्री कैसे तैयार होती है।", """
 <p><b>MP Board हल</b> मध्यप्रदेश बोर्ड (MPBSE) के विद्यार्थियों के लिए एक निःशुल्क शैक्षिक वेबसाइट है। यहाँ NCERT/MP Board पाठ्यपुस्तकों पर आधारित <b>चरणबद्ध हल, नोट्स, सूत्र-सारणी, ऑनलाइन क्विज़ और अभ्यास प्रश्नपत्र</b> सरल हिंदी में दिए जाते हैं।</p>
+<p>MP Board कक्षा 9 और 10 में गणित की पाठ्यपुस्तक NCERT की ही है, जो CBSE में भी पढ़ाई जाती है। इसलिए यहाँ के हल MP Board, NCERT और CBSE — तीनों के विद्यार्थियों के काम आते हैं।</p>
 <h2>हमारा उद्देश्य</h2>
 <p>हर विद्यार्थी, चाहे गाँव में हो या शहर में, बिना किसी शुल्क के अच्छी गुणवत्ता की अध्ययन सामग्री पा सके और हर प्रश्न को समझकर हल करना सीखे, केवल उत्तर रटना नहीं।</p>
 <h2>सामग्री कैसे तैयार होती है</h2>
@@ -314,8 +326,8 @@ INFO = [
 <h2>अभी क्या उपलब्ध है</h2>
 <p>फ़िलहाल कक्षा 9 और 10 गणित की सामग्री उपलब्ध है; अन्य कक्षाएँ और विषय धीरे-धीरे जोड़े जा रहे हैं।</p>
 <p><a href="/hi/author/">लेखक परिचय</a> · <a href="/hi/contact/">संपर्क</a></p>"""),
-    ("author", "लेखक परिचय: हेमंत कुमार टेकन", "MP Board हल के लेखक हेमंत कुमार टेकन, गणित शिक्षक, कक्षा 9 और 10।", """
-<p><b>हेमंत कुमार टेकन</b> मध्यप्रदेश में गणित शिक्षक हैं और MP Board की <b>कक्षा 9 और 10</b> को गणित पढ़ाते हैं।</p>
+    ("author", "लेखक परिचय", "educationdew.com की सामग्री MP Board कक्षा 9 और 10 के अनुभवी गणित शिक्षक द्वारा तैयार की जाती है।", """
+<p>educationdew.com की सामग्री मध्यप्रदेश के एक <b>अनुभवी गणित शिक्षक</b> द्वारा तैयार की जाती है, जो MP Board की <b>कक्षा 9 और 10</b> को गणित पढ़ाते हैं।</p>
 <p>इस वेबसाइट के सभी हल, नोट्स, क्विज़ और अभ्यास प्रश्नपत्र उन्हीं के मार्गदर्शन में तैयार किए जाते हैं। कक्षा में विद्यार्थियों को जहाँ सबसे अधिक कठिनाई आती है, उन्हीं बातों को ध्यान में रखकर हर हल चरणबद्ध लिखा जाता है।</p>
 <h2>लेखन के नियम</h2>
 <ul><li>पाठ्यपुस्तक के प्रश्न और आकृतियाँ हूबहू।</li><li>हर पंक्ति में एक ही चरण, स्पष्ट संरेखण के साथ।</li><li>उत्तरों की गणना से जाँच।</li></ul>
@@ -350,7 +362,7 @@ INFO = [
     ("terms", "उपयोग की शर्तें", "MP Board हल के उपयोग की शर्तें।", """
 <p><i>अंतिम अद्यतन: 2026-11-03</i></p>
 <ul><li>यह वेबसाइट विद्यार्थियों और शिक्षकों के निजी, गैर-व्यावसायिक अध्ययन के लिए निःशुल्क है।</li>
-<li>हल, नोट्स, आलेख और प्रश्नपत्र © हेमंत कुमार टेकन। कक्षा में पढ़ाने या विद्यार्थियों से साझा करने के लिए लिंक भेजें; सामग्री को अपनी वेबसाइट, ऐप या पुस्तक में बिना अनुमति कॉपी न करें।</li>
+<li>हल, नोट्स, आलेख और प्रश्नपत्र © educationdew.com। कक्षा में पढ़ाने या विद्यार्थियों से साझा करने के लिए लिंक भेजें; सामग्री को अपनी वेबसाइट, ऐप या पुस्तक में बिना अनुमति कॉपी न करें।</li>
 <li>सामग्री “जैसी है” उपलब्ध कराई जाती है; विवरण के लिए <a href="/hi/disclaimer/">अस्वीकरण</a> देखें।</li>
 <li>वेबसाइट का उपयोग करने पर आप इन शर्तों और <a href="/hi/privacy/">गोपनीयता नीति</a> से सहमत होते हैं।</li></ul>"""),
 ]

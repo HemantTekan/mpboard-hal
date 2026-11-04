@@ -1,7 +1,7 @@
 # mpboard-hal
 NCERT and MP BOARD Textbook Solutions, Class 1 to 12. Both Hindi and English Medium. Quiz and Previous Year Question Paper Solutions.
 
-© Hemant Kumar Tekan. All rights reserved.
+© educationdew.com. All rights reserved.
 
 ## Structure
 - `catalog.json` — every class, subject, chapter and item (notes / exercise / quiz / paper) with Hindi and English titles.

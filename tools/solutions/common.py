@@ -135,7 +135,7 @@ CSS = """
 *{box-sizing:border-box}
 body{margin:0;font-family:"Noto Sans Devanagari","Mangal",system-ui,sans-serif;color:var(--ink);line-height:1.65;font-size:17px;
  background:#f4f6fb}
-body::before{content:"HEMANT KUMAR TEKAN";position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-45deg);
+body::before{content:"educationdew.com";position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-45deg);
  font:700 9vw/1 system-ui,sans-serif;color:rgba(0,0,0,.045);white-space:nowrap;pointer-events:none;z-index:0}
 .top{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--pri);color:#fff;position:sticky;top:0;z-index:5}
 .top a{color:#fff;text-decoration:none}.top .brand{font-weight:700;font-size:19px}
@@ -193,7 +193,8 @@ def page(BASE, chnum, chname, slug, title, sub, qs, prev, nxt):
     doc = f"""<!doctype html>
 <html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>कक्षा 10 गणित {e(title)} हल | MP Board हल</title>
-<meta name="description" content="कक्षा 10 गणित अध्याय {chnum} {e(chname)}, {e(title)} के सभी प्रश्नों के चरणबद्ध हल।">
+<meta name="description" content="कक्षा 10 गणित अध्याय {chnum} {e(chname)}, {e(title)} के सभी प्रश्नों के चरणबद्ध हल — MP Board, NCERT और CBSE के लिए, हिंदी माध्यम।">
+<meta name="keywords" content="MP Board, MPBSE, NCERT, CBSE, कक्षा 10, गणित, हल, हिंदी माध्यम">
 <link rel="stylesheet" href="/assets/katex/katex.min.css"><style>{CSS}</style></head><body>
 <header class="top"><a class="brand" href="/hi/">MP Board हल</a><a class="sw" href="/en{BASE[3:]}">English Medium</a></header>
 <main><nav class="crumbs"><a href="/hi/">होम</a> › <a href="/hi/class-10/">कक्षा 10</a> › <a href="/hi/class-10/maths/">गणित</a> › <a href="{BASE}">अध्याय {chnum}</a> › <span>{e(title)}</span></nav>
@@ -201,7 +202,8 @@ def page(BASE, chnum, chname, slug, title, sub, qs, prev, nxt):
 <div class="jump">{jump}</div>
 {body}
 <div class="btns">{pv}{nx}</div>
-</main><footer>© हेमंत कुमार टेकन · MP Board और NCERT पाठ्यपुस्तकों के चरणबद्ध हल</footer></body></html>
+<p class="boards" style="font-size:14px;color:#555;margin:18px 0">यह हल <b>MP Board (MPBSE)</b>, <b>NCERT</b> और <b>CBSE</b> — तीनों के कक्षा 10 गणित के विद्यार्थियों के लिए उपयोगी है, क्योंकि तीनों में गणित की पाठ्यपुस्तक NCERT की ही है।</p>
+</main><footer>© educationdew.com · MP Board, NCERT और CBSE पाठ्यपुस्तकों के चरणबद्ध हल</footer></body></html>
 """
     out = ROOT / "site" / BASE.strip("/") / slug / "index.html"
     out.parent.mkdir(parents=True, exist_ok=True)

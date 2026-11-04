@@ -7,8 +7,8 @@ import html, json, pathlib, re, subprocess, sys, datetime
 
 BASE = "https://educationdew.com"
 SITE_NAME = "MP Board हल"
-AUTHOR = "हेमंत कुमार टेकन"
-AUTHOR_DESC = "गणित शिक्षक, MP Board कक्षा 9 और 10"
+AUTHOR = "educationdew.com"
+AUTHOR_DESC = "MP Board, NCERT और CBSE कक्षा 9–10 गणित के चरणबद्ध हल"
 START, END = "<!--seo-->", "<!--/seo-->"
 
 root = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "site")
@@ -50,7 +50,7 @@ for p in sorted(root.rglob("*.html")):
     desc_m = re.search(r'<meta name="description" content="([^"]*)"', s)
     desc = html.unescape(desc_m.group(1)) if desc_m else ""
     main_m = re.search(r"<main.*?</main>", s, re.S)
-    main_txt = text_of(main_m.group(0)) if main_m else ""
+    main_txt = text_of(re.sub(r'<p class="boards".*?</p>', "", main_m.group(0), flags=re.S)) if main_m else ""
 
     # thin / placeholder pages: keep out of the index until real content exists
     thin = (rel == "404.html" or rel.startswith("en/")
@@ -102,14 +102,15 @@ for p in sorted(root.rglob("*.html")):
                                          "Formula sheet" if "/formulas/" in rel else
                                          "Practice paper" if "/papers/" in rel else "Step-by-step solutions"),
                 "about": {"@type": "Thing", "name": "गणित"},
-                "author": {"@type": "Person", "name": AUTHOR, "description": AUTHOR_DESC},
+                "author": {"@type": "Organization", "name": AUTHOR, "url": BASE + "/"},
+                "keywords": "MP Board, MPBSE, NCERT, CBSE, गणित, हल",
                 "publisher": {"@type": "Organization", "name": SITE_NAME, "url": BASE + "/"},
                 "dateModified": lastmod(p),
             }
             ld.append(lr)
         if rel == "hi/index.html":
             ld.append({"@context": "https://schema.org", "@type": "WebSite", "name": SITE_NAME, "url": BASE + "/hi/",
-                       "inLanguage": "hi", "author": {"@type": "Person", "name": AUTHOR, "description": AUTHOR_DESC}})
+                       "inLanguage": "hi", "description": AUTHOR_DESC, "author": {"@type": "Organization", "name": AUTHOR, "url": BASE + "/"}})
         for obj in ld:
             head.append('<script type="application/ld+json">' + json.dumps(obj, ensure_ascii=False) + "</script>")
         entries.append((url, lastmod(p)))
