@@ -1,3 +1,4 @@
+import re
 #!/usr/bin/env python3
 """Shared helpers for Hindi solution pages (colourful, responsive, KaTeX pre-rendered)."""
 import pathlib, html
@@ -85,7 +86,17 @@ def given(k, f):
             f"<div class='box f'><b>ज्ञात करना है</b><div>{f}</div></div></div>")
 
 
+_LAB = re.compile(r"(?<![\\\w])\((i|ii|iii|iv|v|vi|vii|viii|ix)\)\s")
+
+
 def ans(t):
+    """Answer; when it has several labelled parts (i), (ii)... put each on its own line."""
+    marks = [mm.start() for mm in _LAB.finditer(t)]
+    if len(marks) >= 2:
+        pre = t[:marks[0]].strip()
+        segs = [t[a:b].strip().rstrip(",;").strip() for a, b in zip(marks, marks[1:] + [len(t)])]
+        rows = "".join(f"<div class='al'>{x}</div>" for x in segs)
+        return f"<div class='ans'><b>उत्तर:</b>{(' ' + pre) if pre else ''}<div class='als'>{rows}</div></div>"
     return f"<div class='ans'><b>उत्तर:</b> {t}</div>"
 
 
@@ -122,7 +133,11 @@ def m(t):
     return "\\(" + t + "\\)"
 
 
-def formula(name, t):
+def formula(name, t, items=None):
+    """A formula box; several formulas in one place are numbered (1), (2), ..."""
+    if items:
+        rows = "".join(f"<div class='fi'><span class='fn'>({i})</span><span>{x}</span></div>" for i, x in enumerate(items, 1))
+        return f"<div class='frm'><b>सूत्र ({name}):</b> {t}<div class='fis'>{rows}</div></div>"
     return f"<div class='frm'><b>सूत्र ({name}):</b> {t}</div>"
 
 
@@ -131,6 +146,7 @@ def note(t):
 
 
 CSS = """
+.als{margin-top:4px}.al{margin:3px 0;padding-left:.2em}.fis{margin-top:4px}.fi{display:flex;gap:6px;margin:4px 0}.fn{flex:none;font-weight:600}
 :root{--ink:#1d2433;--muted:#5d6676;--pri:#1f5aa6}
 *{box-sizing:border-box}
 body{margin:0;font-family:"Noto Sans Devanagari","Mangal",system-ui,sans-serif;color:var(--ink);line-height:1.65;font-size:17px;

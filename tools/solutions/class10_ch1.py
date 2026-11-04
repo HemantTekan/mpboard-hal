@@ -3,7 +3,9 @@
 Writes colourful, responsive, self-contained HTML pages into site/.
 Run from repo root: python3 tools/solutions/class10_ch1.py
 """
-import pathlib, html
+import pathlib, html, sys
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import common  # noqa
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 BASE = "/hi/class-10/maths/chapter-01/"
@@ -90,7 +92,7 @@ def given(k, f):
 
 
 def ans(t):
-    return f"<div class='ans'><b>उत्तर:</b> {t}</div>"
+    return common.ans(t)
 
 
 def q(num, text, body, color):
@@ -255,6 +257,7 @@ main{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:14px}
 .eq{margin:8px 0;padding:8px 14px;background:#f7f8fc;border-radius:10px;display:grid;width:fit-content;grid-template-columns:auto auto auto;column-gap:8px;row-gap:4px;align-items:center;max-width:100%}
 .eq .l{text-align:right}.eq .s{text-align:center}.eq .r{text-align:left}
 .vt{font-weight:700;margin-top:8px}.ok{color:#0f7a4c;font-weight:600}
+.als{margin-top:4px}.al{margin:3px 0;padding-left:.2em}
 .ans{background:#e6f7ee;border:2px solid #6cc596;border-radius:12px;padding:10px 12px;margin-top:12px}.ans b{color:#0f7a4c}
 .thm{background:#f4ecff;border:1px dashed #a77bf3;border-radius:10px;padding:8px 12px;margin:8px 0;font-size:15.5px}
 .katex{font-size:1.12em}
