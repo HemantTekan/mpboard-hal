@@ -22,7 +22,7 @@ T = {
                medium="हिंदी माध्यम", other="English Medium", inside="इसमें क्या है", open_quiz="क्विज़ शुरू करें",
                ready="उपलब्ध", items_none="इस अध्याय के हल जल्द आ रहे हैं।",
                tag="MP Board, NCERT और CBSE पाठ्यपुस्तकों के चरणबद्ध हल, चित्र सहित",
-               notes="नोट्स", quiz="क्विज़", exercises="प्रश्नावली के हल", subjects="विषय", sections="सामग्री के प्रकार",
+               notes="नोट्स", quiz="क्विज़", pdfs="PDF फ़ाइलें", exercises="प्रश्नावली के हल", subjects="विषय", sections="सामग्री के प्रकार",
                none_yet="अभी उपलब्ध नहीं, जल्द आ रहा है।", back_ch="← अध्याय पर लौटें"),
     "en": dict(home="Home", cls="Class", ch="Chapter", soon="Coming soon", choose_cls="Choose your class",
                choose_sub="Choose a subject", choose_ch="Choose a chapter", pdf_view="View PDF", pdf_dl="Download PDF",
@@ -30,7 +30,7 @@ T = {
                medium="English Medium", other="हिंदी माध्यम", inside="What's inside", open_quiz="Start quiz",
                ready="Available", items_none="Solutions for this chapter are coming soon.",
                tag="Step-by-step solutions for MP Board and NCERT textbooks, with diagrams",
-               notes="Notes", quiz="Quiz", exercises="Exercise Solutions", subjects="Subjects", sections="Browse by type",
+               notes="Notes", quiz="Quiz", pdfs="PDF Files", exercises="Exercise Solutions", subjects="Subjects", sections="Browse by type",
                none_yet="Not available yet, coming soon.", back_ch="← Back to chapter"),
 }
 ICON = {"notes": "📘", "exercise": "✏️", "quiz": "🎯", "paper": "📝"}
@@ -158,12 +158,23 @@ def paper_list(lang, papers):
         for p in papers) + "</ul>"
 
 
+def pdf_list(lang, pdfs):
+    t = T[lang]
+    if not pdfs:
+        return f'<p class="note">{e(t["none_yet"])}</p>'
+    return '<ul class="list">' + "".join(
+        f'<li><a href="/{lang}/pdf/{p["slug"]}/"><b>{e(p["title"][lang])}</b><small>{e(t["cls"])} {p["class"]}'
+        + (f' · {e(t["ch"])} {p["chapter"]}' if p.get("chapter") else "") + '</small></a></li>'
+        for p in pdfs) + "</ul>"
+
+
 def type_buttons(lang):
     t = T[lang]
     return (f'<h2>{e(t["sections"])}</h2><div class="tiles">'
             f'<a class="tile" href="/{lang}/notes/"><b>📘 {e(t["notes"])}</b><small>{len(collect(lang, "notes"))} {e(t["ready"])}</small></a>'
             f'<a class="tile" href="/{lang}/quiz/"><b>🎯 {e(t["quiz"])}</b><small>{len(collect(lang, "quiz"))} {e(t["ready"])}</small></a>'
             f'<a class="tile" href="/{lang}/papers/"><b>📝 {e(t["papers"])}</b><small>{len([p for p in cat["papers"] if p.get(lang)])} {e(t["ready"])}</small></a>'
+            f'<a class="tile" href="/{lang}/pdf/"><b>📄 {e(t["pdfs"])}</b><small>{len([p for p in cat.get("pdfs", []) if p.get(lang)])} {e(t["ready"])}</small></a>'
             '</div>')
 
 
@@ -209,6 +220,16 @@ def build():
         page(lang, f"/{lang}/notes/", f"📘 {t['notes']}", [(t["home"], home), (t["notes"], f"/{lang}/notes/")], item_list(lang, collect(lang, "notes")))
         page(lang, f"/{lang}/quiz/", f"🎯 {t['quiz']}", [(t["home"], home), (t["quiz"], f"/{lang}/quiz/")], item_list(lang, collect(lang, "quiz")))
         page(lang, f"/{lang}/papers/", f"📝 {t['papers']}", [(t["home"], home), (t["papers"], f"/{lang}/papers/")], paper_list(lang, papers))
+        pdfs = [p for p in cat.get("pdfs", []) if p.get(lang)]
+        page(lang, f"/{lang}/pdf/", f"📄 {t['pdfs']}", [(t["home"], home), (t["pdfs"], f"/{lang}/pdf/")], pdf_list(lang, pdfs))
+        for p in pdfs:
+            ppath = f"/{lang}/pdf/{p['slug']}/"
+            d = p[lang]
+            b = "<ul>" + "".join(f"<li>{e(x)}</li>" for x in d.get("summary", [])) + "</ul>"
+            b += (f'<div class="btns"><a class="btn" href="{e(d["pdf"])}">{e(t["pdf_view"])}</a>'
+                  f'<a class="btn ghost" href="{e(d["pdf"])}" download>{e(t["pdf_dl"])}</a></div>')
+            other = "en" if lang == "hi" else "hi"
+            page(lang, ppath, p["title"][lang], [(t["home"], home), (t["pdfs"], f"/{lang}/pdf/"), (p["title"][lang], ppath)], b, switch_to=f"/{other}/pdf/")
 
         for c in cat["classes"]:
             if not c["subjects"]:
@@ -223,6 +244,7 @@ def build():
             body += f'<h2>📘 {e(t["notes"])}</h2>' + item_list(lang, collect(lang, "notes", c["num"]), False)
             body += f'<h2>🎯 {e(t["quiz"])}</h2>' + item_list(lang, collect(lang, "quiz", c["num"]), False)
             body += f'<h2>📝 {e(t["papers"])}</h2>' + paper_list(lang, cp)
+            body += f'<h2>📄 {e(t["pdfs"])}</h2>' + pdf_list(lang, [p for p in cat.get("pdfs", []) if p["class"] == c["num"] and p.get(lang)])
             page(lang, cpath, cname, [(t["home"], home), (cname, cpath)], body)
 
             for s in c["subjects"]:

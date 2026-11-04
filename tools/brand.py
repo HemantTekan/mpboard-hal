@@ -5,10 +5,10 @@ import re, sys, pathlib
 
 SITE = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else pathlib.Path(__file__).resolve().parents[1] / "site")
 L = {
-    "hi": dict(name="MP Board हल", home="होम", c10="कक्षा 10", c9="कक्षा 9", notes="नोट्स", quiz="क्विज़", papers="प्रश्नपत्र",
+    "hi": dict(name="MP Board हल", home="होम", c10="कक्षा 10", c9="कक्षा 9", notes="नोट्स", quiz="क्विज़", papers="प्रश्नपत्र", pdfs="PDF",
                tag="MP Board, NCERT और CBSE गणित के चरणबद्ध हल, चित्र और आलेख सहित — आसान हिंदी में।",
                chips=["✔ हर प्रश्न का हल", "✔ चित्र और आलेख", "✔ PDF और क्विज़"]),
-    "en": dict(name="MP Board Solutions", home="Home", c10="Class 10", c9="Class 9", notes="Notes", quiz="Quiz", papers="Papers",
+    "en": dict(name="MP Board Solutions", home="Home", c10="Class 10", c9="Class 9", notes="Notes", quiz="Quiz", papers="Papers", pdfs="PDF",
                tag="Step-by-step maths solutions for MP Board, NCERT and CBSE, with diagrams and graphs.",
                chips=["✔ Every question solved", "✔ Diagrams & graphs", "✔ PDFs & quizzes"]),
 }
@@ -35,7 +35,7 @@ def header(lang, rel, sw):
     if rel == "/":
         hi_url, en_url = "/hi/", "/en/"
     items = [("n1", "🏠 " + t["home"], f"/{lang}/"), ("n2", t["c10"], f"/{lang}/class-10/"), ("n3", t["c9"], f"/{lang}/class-09/"),
-             ("n4", "📘 " + t["notes"], f"/{lang}/notes/"), ("n5", "🎯 " + t["quiz"], f"/{lang}/quiz/"), ("n6", "📝 " + t["papers"], f"/{lang}/papers/")]
+             ("n4", "📘 " + t["notes"], f"/{lang}/notes/"), ("n5", "🎯 " + t["quiz"], f"/{lang}/quiz/"), ("n6", "📝 " + t["papers"], f"/{lang}/papers/"), ("n7", "📄 " + t["pdfs"], f"/{lang}/pdf/")]
     cur = max((h for _, _, h in items if rel.startswith(h)), key=len, default=None)
     nav = "".join(f'<a class="{c}{" cur" if h == cur else ""}" href="{h}">{lab}</a>' for c, lab, h in items)
     return (f'<header class="top"><div class="bar"><a class="brand" href="/{lang}/" aria-label="educationdew {t["name"]}">'

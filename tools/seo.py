@@ -86,7 +86,7 @@ for p in sorted(root.rglob("*.html")):
                 items.append(it)
             if items:
                 ld.append({"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": items})
-        if "/exercise-" in rel or "/notes/" in rel or "/formulas/" in rel or "/papers/" in rel and rel.count("/") > 2 or "/quiz/" in rel and rel.count("/") > 2:
+        if "/exercise-" in rel or "/notes/" in rel or "/formulas/" in rel or "/pdf/" in rel or "/papers/" in rel and rel.count("/") > 2 or "/quiz/" in rel and rel.count("/") > 2:
             cls = re.search(r"class-(\d+)", rel)
             lr = {
                 "@context": "https://schema.org",
