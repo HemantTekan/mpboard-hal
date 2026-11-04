@@ -13,4 +13,6 @@
 - `GET /api/quiz/leaderboard?quiz=hi/class-09/maths/chapter-03&days=30&limit=10`
 - `GET /api/quiz/stats?quiz=...` (attempts, avg %, 5 most-missed questions)
 
-Quiz pages use `/assets/quiz-api.js` (`EDQuiz.submit`, `EDQuiz.board`).
+- Teacher (Bearer ADMIN_KEY, a Worker secret, never in git; deploy keeps it via keep_bindings): `GET /api/admin/overview`, `GET /api/admin/quiz?quiz=&days=`, `POST /api/admin/attempts/delete {id}`. UI: `/teacher/` (noindex, robots-disallowed). Rotate key: PUT .../workers/scripts/educationdew/secrets {name:ADMIN_KEY,text,type:secret_text}.
+
+Quiz pages set `window.ED_QUIZ = {id, questions}` (teacher page reads question text from it) and use `/assets/quiz-api.js` (`EDQuiz.submit`, `EDQuiz.board`).

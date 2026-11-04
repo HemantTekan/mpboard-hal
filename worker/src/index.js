@@ -1,6 +1,7 @@
 // educationdew Worker: static site is served by the assets layer; only /api/* reaches this code
 // (assets.config.run_worker_first = ["/api/*"]). Add a feature = add a file in ./routes and one line in ROUTES.
 import * as quiz from "./routes/quiz.js";
+import * as admin from "./routes/admin.js";
 import { json, error } from "./lib/http.js";
 
 const ROUTES = [
@@ -11,6 +12,9 @@ const ROUTES = [
   ["POST", /^\/api\/quiz\/attempts$/, quiz.createAttempt],
   ["GET", /^\/api\/quiz\/leaderboard$/, quiz.leaderboard],
   ["GET", /^\/api\/quiz\/stats$/, quiz.stats],
+  ["GET", /^\/api\/admin\/overview$/, admin.overview],
+  ["GET", /^\/api\/admin\/quiz$/, admin.quizDetail],
+  ["POST", /^\/api\/admin\/attempts\/delete$/, admin.deleteAttempt],
 ];
 
 export default {

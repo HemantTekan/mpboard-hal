@@ -67,7 +67,7 @@ for bucket in buckets:
 # 3) code + bindings
 src = (ROOT / CFG["main"]).parent; main = (ROOT / CFG["main"]).relative_to(src).as_posix()
 ac = CFG["assets"]
-meta = {"main_module": main, "compatibility_date": CFG["compatibility_date"],
+meta = {"main_module": main, "keep_bindings": ["secret_text"], "compatibility_date": CFG["compatibility_date"],
         "bindings": [{"type": "assets", "name": ac["binding"]}] +
                     [{"type": "d1", "name": d["binding"], "id": d["database_id"]} for d in CFG.get("d1_databases", [])] +
                     [{"type": "r2_bucket", "name": b["binding"], "bucket_name": b["bucket_name"]} for b in CFG.get("r2_buckets", [])],

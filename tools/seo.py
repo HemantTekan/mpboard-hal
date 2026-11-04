@@ -53,7 +53,7 @@ for p in sorted(root.rglob("*.html")):
     main_txt = text_of(re.sub(r'<p class="boards".*?</p>', "", main_m.group(0), flags=re.S)) if main_m else ""
 
     # thin / placeholder pages: keep out of the index until real content exists
-    thin = (rel == "404.html" or rel.startswith("en/")
+    thin = (rel == "404.html" or rel.startswith("en/") or rel.startswith("teacher/")
             or ("जल्द आ रहे हैं" in main_txt and len(main_txt) < 300))
 
     head = []
@@ -134,5 +134,5 @@ for u, d in entries:
     sm.append(f"<url><loc>{u}</loc><lastmod>{d}</lastmod></url>")
 sm.append("</urlset>")
 (root / "sitemap.xml").write_text("\n".join(sm) + "\n", encoding="utf-8")
-(root / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {BASE}/sitemap.xml\n", encoding="utf-8")
+(root / "robots.txt").write_text(f"User-agent: *\nAllow: /\nDisallow: /teacher/\nDisallow: /api/\n\nSitemap: {BASE}/sitemap.xml\n", encoding="utf-8")
 print(f"seo: {len(entries)} indexable pages in sitemap")
