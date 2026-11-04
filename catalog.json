@@ -316,7 +316,41 @@
         "hi": "दो चर वाले रैखिक समीकरण युग्म",
         "en": "Pair of Linear Equations in Two Variables"
        },
-       "items": []
+       "items": [
+        {
+         "slug": "exercise-3-1",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 3.1",
+          "en": "Exercise 3.1"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-03/exercise-3-1/"
+         }
+        },
+        {
+         "slug": "exercise-3-2",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 3.2",
+          "en": "Exercise 3.2"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-03/exercise-3-2/"
+         }
+        },
+        {
+         "slug": "exercise-3-3",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 3.3",
+          "en": "Exercise 3.3"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-03/exercise-3-3/"
+         }
+        }
+       ]
       },
       {
        "num": 4,
