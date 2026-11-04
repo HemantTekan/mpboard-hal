@@ -358,7 +358,41 @@
         "hi": "द्विघात समीकरण",
         "en": "Quadratic Equations"
        },
-       "items": []
+       "items": [
+        {
+         "slug": "exercise-4-1",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 4.1",
+          "en": "Exercise 4.1"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-04/exercise-4-1/"
+         }
+        },
+        {
+         "slug": "exercise-4-2",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 4.2",
+          "en": "Exercise 4.2"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-04/exercise-4-2/"
+         }
+        },
+        {
+         "slug": "exercise-4-3",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 4.3",
+          "en": "Exercise 4.3"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-04/exercise-4-3/"
+         }
+        }
+       ]
       },
       {
        "num": 5,
