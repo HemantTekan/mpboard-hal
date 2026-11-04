@@ -202,6 +202,7 @@ def build():
             has = class_has(c, lang)
             ents.append((f"{t['cls']} {c['num']}", t["ready"] if has else t["soon"],
                          f"/{lang}/{cls_slug(c['num'])}/" if c["subjects"] else None))
+        ents.sort(key=lambda x: x[2] is None or x[1] == t["soon"])  # available classes first
         papers = [p for p in cat["papers"] if p.get(lang)]
         body = f'<p class="lead">{e(t["tag"])}</p><h2>{e(t["choose_cls"])}</h2>' + tiles(ents) + type_buttons(lang)
         page(lang, home, f"{cat['site']['name'][lang]} — {t['medium']}", None, body)

@@ -1,5 +1,6 @@
 import os,sys,json,base64,mimetypes,subprocess,blake3,pathlib,urllib.request
 A="1f56a0aa6f2d247a2e9c0c1cfc73c2e7";P="mpboard-hal";SITE=pathlib.Path(sys.argv[1])
+subprocess.run([sys.executable, str(pathlib.Path(__file__).with_name("brand.py")), sys.argv[1]], check=True)
 subprocess.run([sys.executable, str(pathlib.Path(__file__).with_name("seo.py")), sys.argv[1]], check=True)
 def jwt():
     r=subprocess.run(["curl","-s",f"https://api.cloudflare.com/client/v4/accounts/{A}/pages/projects/{P}/upload-token"],capture_output=True,text=True)

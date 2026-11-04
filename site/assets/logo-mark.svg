@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 116" role="img" aria-label="educationdew">
+<defs>
+<linearGradient id="dg" x1="0" y1="0" x2="0.35" y2="1"><stop offset="0" stop-color="#8BD34F"/><stop offset=".55" stop-color="#2FA57A"/><stop offset="1" stop-color="#0E7FA0"/></linearGradient>
+<linearGradient id="hl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+</defs>
+<path d="M50 3C50 3 9 47 9 74a41 41 0 0 0 82 0C91 47 50 3 50 3Z" fill="url(#dg)"/>
+<path d="M50 3C50 3 9 47 9 74a41 41 0 0 0 82 0C91 47 50 3 50 3Z" fill="none" stroke="#0B6E8C" stroke-opacity=".35" stroke-width="2"/>
+<path d="M22 70c0-16 14-34 22-44-4 10-12 26-12 42 0 9 3 17 8 23-11-3-18-11-18-21Z" fill="url(#hl)"/>
+<path d="M33 28l2 5.6 5.6 2-5.6 2L33 43.2l-2-5.6-5.6-2 5.6-2Z" fill="#fff"/>
+<g fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+<path d="M27 63c2-6 6-8 12-8h35"/>
+<path d="M44 56c0 14-1 25-7 34"/>
+<path d="M62 56v24c0 8 6 11 12 6"/>
+</g>
+</svg>
