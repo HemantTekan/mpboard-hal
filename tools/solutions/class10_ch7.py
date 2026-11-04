@@ -1,0 +1,345 @@
+#!/usr/bin/env python3
+"""Class 10 Maths, Chapter 7 (निर्देशांक ज्यामिति): Exercise 7.1, 7.2 (rationalised), Hindi medium.
+Run from repo root: python3 tools/solutions/class10_ch7.py
+"""
+import sys, pathlib, re as _re
+from fractions import Fraction as F
+sys.path.insert(0, str(pathlib.Path(__file__).parent))
+from common import *  # noqa
+from common import _LAB
+
+BASE = "/hi/class-10/maths/chapter-07/"
+CH = "निर्देशांक ज्यामिति"
+_DEV = _re.compile(r"[\u0900-\u097F]")
+
+
+def mc(c):
+    c = str(c)
+    if not _DEV.search(c):
+        return mcell(c)
+    out = []
+    for i, piece in enumerate(_re.split(r"\\text\{([^}]*)\}", c)):
+        if i % 2:
+            out.append(piece)
+        elif piece.strip().strip("\\").strip():
+            out.append("\\(" + piece.strip().rstrip("\\").strip() + "\\)")
+    return " ".join(out)
+
+
+def lines(head, *rest):
+    head, rest = mc(head), [mc(r) for r in rest]
+    out = f"<span class='l'>{head}</span><span class='s'>=</span><span class='r'>{rest[0]}</span>"
+    out += "".join(f"<span class='l'></span><span class='s'>=</span><span class='r'>{r}</span>" for r in rest[1:])
+    return "<div class='eq'>" + out + "</div>"
+
+
+def eqs(*pairs):
+    rows = "".join(f"<span class='l'>{mc(a)}</span><span class='s'>=</span><span class='r'>{mc(b)}</span>" for a, b in pairs)
+    return "<div class='eq'>" + rows + "</div>"
+
+
+def p(t):
+    return f"<p>{t}</p>"
+
+
+def ok(t):
+    return f"<p class='ok'>{t}</p>"
+
+
+def qt(t):
+    marks = [mm.start() for mm in _LAB.finditer(t)]
+    if len(marks) < 2:
+        return t
+    pre = t[:marks[0]].strip()
+    segs = [t[x:y].strip() for x, y in zip(marks, marks[1:] + [len(t)])]
+    return pre + "".join(f"<span style='display:block;font-weight:500;margin-top:4px'>{x}</span>" for x in segs)
+
+
+def gp(dia, sid, extra=None):
+    """दिया है / सिद्ध करना है boxes."""
+    h = (f"<div class='gv'><div class='box k'><b>दिया है</b><div>{dia}</div></div>"
+         f"<div class='box f'><b>{'सिद्ध करना है' if extra is None else extra}</b><div>{sid}</div></div></div>")
+    return h
+
+
+def pf(*rows):
+    """उपपत्ति: each row is (statement, reason); the reason sits on its own small line."""
+    out = "<div class='vt'>उपपत्ति:</div><div style='margin:6px 0 4px'>"
+    for st, rs in rows:
+        out += ("<div style='padding:6px 0;border-bottom:1px dashed #e3e7f3'>"
+                f"<div>{st}</div>" + (f"<div style='font-size:.88em;color:#5a6275'>({rs})</div>" if rs else "") + "</div>")
+    return out + "</div>"
+
+
+def r(a, b):
+    return m(f"\\dfrac{{{a}}}{{{b}}}")
+
+
+def T(x):
+    return m("\\triangle " + x)
+
+
+def A(x):
+    return m("\\angle " + x)
+
+
+def fig(W, H, pts, segs, dashed=(), labels=(), extra="", caption=""):
+    """Small geometry figure. pts: name -> (x, y, dx, dy) where (dx, dy) shifts the letter."""
+    g = [f"<svg class='graph' viewBox='0 0 {W} {H}' role='img' aria-label='{caption or 'आकृति'}' style='max-width:{min(W, 340)}px'>"]
+    for a, b in segs:
+        (x1, y1, *_), (x2, y2, *_) = pts[a], pts[b]
+        g.append(f"<line x1='{x1}' y1='{y1}' x2='{x2}' y2='{y2}' stroke='#1d3a8a' stroke-width='2'/>")
+    for a, b in dashed:
+        (x1, y1, *_), (x2, y2, *_) = pts[a], pts[b]
+        g.append(f"<line x1='{x1}' y1='{y1}' x2='{x2}' y2='{y2}' stroke='#c2410c' stroke-width='1.8' stroke-dasharray='5 4'/>")
+    g.append(extra)
+    for n, (x, y, dx, dy) in pts.items():
+        g.append(f"<circle cx='{x}' cy='{y}' r='2.6' fill='#1d3a8a'/><text x='{x + dx}' y='{y + dy}' font-size='15' font-weight='700' fill='#111' text-anchor='middle'>{n}</text>")
+    for x, y, t in labels:
+        g.append(f"<text x='{x}' y='{y}' font-size='12.5' fill='#b4232a' text-anchor='middle'>{t}</text>")
+    g.append("</svg>")
+    cap = f"<div style='font-size:.85em;color:#5a6275;margin-top:2px'>{caption}</div>" if caption else ""
+    return "<div style='margin:8px 0'>" + "".join(g) + cap + "</div>"
+
+
+import math
+DIST = formula("दूरी सूत्र", m("PQ=\\sqrt{(x_2-x_1)^2+(y_2-y_1)^2}"))
+SEC = formula("विभाजन सूत्र", "बिंदु P जो " + m("A(x_1,y_1)") + " और " + m("B(x_2,y_2)") + " को " + m("m_1:m_2") + " में अंतःविभाजित करे:",
+              [m("x=\\dfrac{m_1x_2+m_2x_1}{m_1+m_2}"), m("y=\\dfrac{m_1y_2+m_2y_1}{m_1+m_2}"), "मध्य-बिंदु: " + m("\\left(\\dfrac{x_1+x_2}{2},\\dfrac{y_1+y_2}{2}\\right)")])
+
+
+def d2(a, b):
+    return (b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2
+
+
+def dist(n1, a, n2, b, simp):
+    """Distance steps; simp = final simplified TeX."""
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    t = lambda v: f"({v})" if v < 0 else str(v)
+    sub = f"\\sqrt{{({b[0]}-{t(a[0])})^2+({b[1]}-{t(a[1])})^2}}".replace("--", "+")
+    rows = [sub, f"\\sqrt{{{t(dx)}^2+{t(dy)}^2}}", f"\\sqrt{{{dx*dx}+{dy*dy}}}", f"\\sqrt{{{dx*dx+dy*dy}}}"]
+    if simp != rows[-1]:
+        rows.append(simp)
+    return lines(f"{n1}{n2}", *rows)
+
+
+def chk_surd(n, simp_val):
+    assert abs(math.sqrt(n) - simp_val) < 1e-9, (n, simp_val)
+
+
+# =====================================================================  Exercise 7.1
+EX71 = []
+P = []
+chk_surd(8, 2 * math.sqrt(2))
+s = p("मान लीजिए A(2, 3) और B(4, 1)") + dist("A", (2, 3), "B", (4, 1), "2\\sqrt{2}")
+P.append(("(i)", s, m("2\\sqrt2") + " इकाई"))
+chk_surd(32, 4 * math.sqrt(2))
+s = p("मान लीजिए A(−5, 7) और B(−1, 3)") + dist("A", (-5, 7), "B", (-1, 3), "4\\sqrt{2}")
+P.append(("(ii)", s, m("4\\sqrt2") + " इकाई"))
+s = p("मान लीजिए A(a, b) और B(−a, −b)") + lines("AB", "\\sqrt{(-a-a)^2+(-b-b)^2}", "\\sqrt{(-2a)^2+(-2b)^2}", "\\sqrt{4a^2+4b^2}", "2\\sqrt{a^2+b^2}")
+P.append(("(iii)", s, m("2\\sqrt{a^2+b^2}") + " इकाई"))
+b = DIST + "".join(part(l, x) for l, x, _ in P) + ans(" ".join(f"{l} {a}" for l, _, a in P))
+EX71.append(("बिंदुओं के निम्नलिखित युग्मों के बीच की दूरियाँ ज्ञात कीजिए: (i) (2, 3), (4, 1) (ii) (−5, 7), (−1, 3) (iii) (a, b), (−a, −b)", b))
+
+assert d2((0, 0), (36, 15)) == 39 ** 2
+s = DIST + p("मान लीजिए O(0, 0) और P(36, 15)") + lines("OP", "\\sqrt{(36-0)^2+(15-0)^2}", "\\sqrt{1296+225}", "\\sqrt{1521}", "39")
+s += p("अनुच्छेद 7.2 में शहर A को (0, 0) पर और शहर B को (36, 15) पर लिया गया है (दूरी km में), इसलिए दोनों शहरों के बीच की दूरी भी 39 km है।")
+s += ans("(i) दूरी 39 इकाई (ii) हाँ, दोनों शहरों A और B के बीच की दूरी 39 km है।")
+EX71.append(("बिंदुओं (0, 0) और (36, 15) के बीच की दूरी ज्ञात कीजिए। क्या अब आप अनुच्छेद 7.2 में दिए दोनों शहरों A और B के बीच की दूरी ज्ञात कर सकते हैं?", s))
+
+A_, B_, C_ = (1, 5), (2, 3), (-2, -11)
+assert (d2(A_, B_), d2(B_, C_), d2(A_, C_)) == (5, 212, 265)
+s = DIST + p("मान लीजिए A(1, 5), B(2, 3) और C(−2, −11)। तीनों बिंदु संरेख होंगे, यदि किन्हीं दो दूरियों का योग तीसरी दूरी के बराबर हो।")
+s += dist("A", A_, "B", B_, "\\sqrt{5}") + dist("B", B_, "C", C_, "2\\sqrt{53}") + dist("A", A_, "C", C_, "\\sqrt{265}")
+s += p("सन्निकट मान: " + m("AB\\approx2.24,\\ BC\\approx14.56,\\ AC\\approx16.28"))
+s += lines("AB+BC", "2.24+14.56", "16.80") + p(m("16.80\\neq16.28") + ", अर्थात् " + m("AB+BC\\neq AC") + "; अन्य दो योग भी तीसरी दूरी के बराबर नहीं हैं (" + m("AB+AC\\neq BC,\\ BC+AC\\neq AB") + ")।")
+s += ans("बिंदु (1, 5), (2, 3) और (−2, −11) संरेख नहीं हैं।")
+EX71.append(("निर्धारित कीजिए कि क्या बिंदु (1, 5), (2, 3) और (−2, −11) संरेख हैं।", s))
+
+A_, B_, C_ = (5, -2), (6, 4), (7, -2)
+assert d2(A_, B_) == d2(B_, C_) == 37 and d2(A_, C_) == 4
+s = DIST + p("मान लीजिए A(5, −2), B(6, 4) और C(7, −2)") + dist("A", A_, "B", B_, "\\sqrt{37}") + dist("B", B_, "C", C_, "\\sqrt{37}") + dist("A", A_, "C", C_, "2")
+s += ok("AB = BC = " + m("\\sqrt{37}") + ", अर्थात् दो भुजाएँ बराबर हैं।") + ans("हाँ, बिंदु (5, −2), (6, 4) और (7, −2) एक समद्विबाहु त्रिभुज के शीर्ष हैं।")
+EX71.append(("जाँच कीजिए कि क्या बिंदु (5, −2), (6, 4) और (7, −2) एक समद्विबाहु त्रिभुज के शीर्ष हैं।", s))
+
+A_, B_, C_, D_ = (3, 4), (6, 7), (9, 4), (6, 1)
+assert d2(A_, B_) == d2(B_, C_) == d2(C_, D_) == d2(D_, A_) == 18 and d2(A_, C_) == d2(B_, D_) == 36
+s = DIST + p("आकृति से चारों मित्रों की स्थितियाँ: A(3, 4), B(6, 7), C(9, 4) और D(6, 1)")
+s += dist("A", A_, "B", B_, "3\\sqrt{2}") + dist("B", B_, "C", C_, "3\\sqrt{2}") + dist("C", C_, "D", D_, "3\\sqrt{2}") + dist("D", D_, "A", A_, "3\\sqrt{2}")
+s += p("विकर्ण:") + dist("A", A_, "C", C_, "6") + dist("B", B_, "D", D_, "6")
+s += ok("चारों भुजाएँ बराबर हैं और दोनों विकर्ण बराबर हैं, अतः ABCD एक वर्ग है।") + ans("चंपा सही है; ABCD एक वर्ग है।")
+EX71.append(("एक कक्षा में, 4 मित्र बिंदुओं A, B, C और D पर बैठे हुए हैं, जैसा कि आकृति में दर्शाया गया है (A(3, 4), B(6, 7), C(9, 4), D(6, 1))। चंपा और चमेली कक्षा के अंदर आती हैं और कुछ मिनट तक देखने के बाद, चंपा चमेली से पूछती है, 'क्या तुम नहीं सोचती हो कि ABCD एक वर्ग है?' चमेली इससे सहमत नहीं है। दूरी सूत्र का प्रयोग करके, बताइए कि इनमें कौन सही है।", s))
+
+P = []
+A_, B_, C_, D_ = (-1, -2), (1, 0), (-1, 2), (-3, 0)
+assert d2(A_, B_) == d2(B_, C_) == d2(C_, D_) == d2(D_, A_) == 8 and d2(A_, C_) == d2(B_, D_) == 16
+s = p("A(−1, −2), B(1, 0), C(−1, 2), D(−3, 0)") + dist("A", A_, "B", B_, "2\\sqrt2") + dist("B", B_, "C", C_, "2\\sqrt2") + dist("C", C_, "D", D_, "2\\sqrt2") + dist("D", D_, "A", A_, "2\\sqrt2")
+s += dist("A", A_, "C", C_, "4") + dist("B", B_, "D", D_, "4") + ok("चारों भुजाएँ बराबर और दोनों विकर्ण बराबर, अतः वर्ग।")
+P.append(("(i)", s, "वर्ग"))
+A_, B_, C_, D_ = (-3, 5), (3, 1), (0, 3), (-1, -4)
+assert d2(A_, C_) == 13 and d2(C_, B_) == 13 and d2(A_, B_) == 52
+s = p("A(−3, 5), B(3, 1), C(0, 3), D(−1, −4)") + dist("A", A_, "B", B_, "2\\sqrt{13}") + dist("A", A_, "C", C_, "\\sqrt{13}") + dist("C", C_, "B", B_, "\\sqrt{13}")
+s += lines("AC+CB", "\\sqrt{13}+\\sqrt{13}", "2\\sqrt{13}", "AB") + ok("अतः A, C, B संरेख हैं, इसलिए इन चार बिंदुओं से कोई चतुर्भुज नहीं बनता।")
+P.append(("(ii)", s, "कोई चतुर्भुज नहीं बनता (A, C, B संरेख हैं)"))
+A_, B_, C_, D_ = (4, 5), (7, 6), (4, 3), (1, 2)
+assert d2(A_, B_) == d2(C_, D_) == 10 and d2(B_, C_) == d2(D_, A_) == 18 and d2(A_, C_) == 4 and d2(B_, D_) == 52
+s = p("A(4, 5), B(7, 6), C(4, 3), D(1, 2)") + dist("A", A_, "B", B_, "\\sqrt{10}") + dist("B", B_, "C", C_, "3\\sqrt2") + dist("C", C_, "D", D_, "\\sqrt{10}") + dist("D", D_, "A", A_, "3\\sqrt2")
+s += dist("A", A_, "C", C_, "2") + dist("B", B_, "D", D_, "2\\sqrt{13}") + ok("सम्मुख भुजाएँ बराबर हैं, पर विकर्ण बराबर नहीं, अतः समांतर चतुर्भुज।")
+P.append(("(iii)", s, "समांतर चतुर्भुज"))
+b = DIST + "".join(part(l, x) for l, x, _ in P) + ans(" ".join(f"{l} {a}" for l, _, a in P))
+EX71.append(("निम्नलिखित बिंदुओं द्वारा बनने वाले चतुर्भुज का प्रकार (यदि कोई है तो) बताइए तथा अपने उत्तर के लिए कारण भी दीजिए: (i) (−1, −2), (1, 0), (−1, 2), (−3, 0) (ii) (−3, 5), (3, 1), (0, 3), (−1, −4) (iii) (4, 5), (7, 6), (4, 3), (1, 2)", b))
+
+assert d2((-7, 0), (2, -5)) == d2((-7, 0), (-2, 9)) == 106
+s = DIST + p("x-अक्ष पर बिंदु का y-निर्देशांक 0 होता है। मान लीजिए वह बिंदु P(x, 0) है, A(2, −5) और B(−2, 9)।")
+s += p("PA = PB, इसलिए " + m("PA^2=PB^2"))
+s += eqs(("(x-2)^2+(0+5)^2", "(x+2)^2+(0-9)^2"), ("x^2-4x+4+25", "x^2+4x+4+81"), ("-4x-4x", "85-29"), ("-8x", "56"), ("x", "-7"))
+s += "<div class='vt'>जाँच:</div>" + lines("PA^2", "(-7-2)^2+5^2", "81+25", "106") + lines("PB^2", "(-7+2)^2+(-9)^2", "25+81", "106") + ok("PA = PB ✔")
+s += ans("अभीष्ट बिंदु (−7, 0) है।")
+EX71.append(("x-अक्ष पर वह बिंदु ज्ञात कीजिए जो (2, −5) और (−2, 9) से समदूरस्थ है।", s))
+
+assert {y for y in range(-20, 20) if 64 + (y + 3) ** 2 == 100} == {3, -9}
+s = DIST + p("P(2, −3), Q(10, y) और PQ = 10") + eqs(("\\sqrt{(10-2)^2+(y+3)^2}", "10"))
+s += p("दोनों पक्षों का वर्ग करने पर") + eqs(("64+(y+3)^2", "100"), ("(y+3)^2", "36"), ("y+3", "\\pm6"))
+s += p("दोनों स्थितियाँ अलग पंक्ति में:") + eqs(("y", "6-3=3"), ("y", "-6-3=-9"))
+s += "<div class='vt'>जाँच:</div>" + p("y = 3: " + m("\\sqrt{64+(3+3)^2}=\\sqrt{100}=10") + " ✔") + p("y = −9: " + m("\\sqrt{64+(-9+3)^2}=\\sqrt{100}=10") + " ✔")
+s += ans("y = 3 या y = −9")
+EX71.append(("y का वह मान ज्ञात कीजिए जिसके लिए बिंदु P(2, −3) और Q(10, y) के बीच की दूरी 10 मात्रक है।", s))
+
+assert d2((0, 1), (5, -3)) == 41 and d2((0, 1), (4, 6)) == 41 and d2((5, -3), (4, 6)) == 82 and d2((5, -3), (-4, 6)) == 162
+s = DIST + p("Q(0, 1), P(5, −3), R(x, 6) और QP = QR, इसलिए " + m("QP^2=QR^2"))
+s += eqs(("(5-0)^2+(-3-1)^2", "(x-0)^2+(6-1)^2"), ("25+16", "x^2+25"), ("x^2", "16"), ("x", "\\pm4"))
+s += p("अतः R(4, 6) या R(−4, 6)।") + lines("QR", "\\sqrt{41}") + lines("QP", "\\sqrt{25+16}", "\\sqrt{41}")
+s += p("R(4, 6) के लिए:") + dist("P", (5, -3), "R", (4, 6), "\\sqrt{82}")
+s += p("R(−4, 6) के लिए:") + dist("P", (5, -3), "R", (-4, 6), "9\\sqrt{2}")
+s += ans("(i) x = 4 या x = −4 (ii) QR = √41 (iii) PR = √82 (जब x = 4) या PR = 9√2 (जब x = −4)")
+EX71.append(("यदि Q(0, 1) बिंदुओं P(5, −3) और R(x, 6) से समदूरस्थ है, तो x के मान ज्ञात कीजिए। दूरियाँ QR और PR भी ज्ञात कीजिए।", s))
+
+s = DIST + p("मान लीजिए P(x, y), A(3, 6) और B(−3, 4)। PA = PB, इसलिए " + m("PA^2=PB^2"))
+s += lines("PA^2", "(x-3)^2+(y-6)^2", "x^2-6x+9+y^2-12y+36") + lines("PB^2", "(x+3)^2+(y-4)^2", "x^2+6x+9+y^2-8y+16")
+s += p("PA² = PB² रखकर दोनों पक्षों से " + m("x^2+y^2+9") + " हटाने पर") + eqs(("-6x-12y+36", "6x-8y+16"), ("-12x-4y+20", "0"))
+s += p("दोनों पक्षों को −4 से भाग देने पर") + eqs(("3x+y-5", "0"))
+s += "<div class='vt'>जाँच:</div>" + p("AB का मध्य-बिंदु (0, 5) दोनों से समदूरस्थ है: " + m("3(0)+5-5=0") + " ✔")
+assert 3 * 0 + 5 - 5 == 0
+s += ans("x और y में संबंध: 3x + y − 5 = 0")
+EX71.append(("x और y में एक ऐसा संबंध ज्ञात कीजिए कि बिंदु (x, y) बिंदुओं (3, 6) और (−3, 4) से समदूरस्थ हो।", s))
+
+# =====================================================================  Exercise 7.2
+EX72 = []
+from fractions import Fraction as F
+
+
+def sec(m1, m2, A, B):
+    return (F(m1 * B[0] + m2 * A[0], m1 + m2), F(m1 * B[1] + m2 * A[1], m1 + m2))
+
+
+def ftex(v):
+    v = F(v)
+    if v.denominator == 1:
+        return str(v.numerator)
+    return ("-" if v < 0 else "") + f"\\dfrac{{{abs(v.numerator)}}}{{{v.denominator}}}"
+
+
+def secsteps(m1, m2, A, B, name="P"):
+    t = lambda v: f"({v})" if v < 0 else str(v)
+    x, y = sec(m1, m2, A, B)
+    sx = f"\\dfrac{{{m1}\\times{t(B[0])}+{m2}\\times{t(A[0])}}}{{{m1}+{m2}}}"
+    sy = f"\\dfrac{{{m1}\\times{t(B[1])}+{m2}\\times{t(A[1])}}}{{{m1}+{m2}}}"
+    nx, ny = m1 * B[0] + m2 * A[0], m1 * B[1] + m2 * A[1]
+    rx = [sx, f"\\dfrac{{{nx}}}{{{m1+m2}}}"] + ([ftex(x)] if ftex(x) != f"\\dfrac{{{nx}}}{{{m1+m2}}}" else [])
+    ry = [sy, f"\\dfrac{{{ny}}}{{{m1+m2}}}"] + ([ftex(y)] if ftex(y) != f"\\dfrac{{{ny}}}{{{m1+m2}}}" else [])
+    return lines("x", *rx) + lines("y", *ry), (x, y)
+
+
+def pt(x, y):
+    return m(f"\\left({ftex(x)},\\ {ftex(y)}\\right)")
+
+
+s, (x, y) = secsteps(2, 3, (-1, 7), (4, -3))
+assert (x, y) == (1, 3)
+b = SEC + p("A(−1, 7), B(4, −3), " + m("m_1:m_2=2:3")) + s + ans("अभीष्ट बिंदु (1, 3) है।")
+EX72.append(("उस बिंदु के निर्देशांक ज्ञात कीजिए, जो बिंदुओं (−1, 7) और (4, −3) को मिलाने वाले रेखाखंड को 2 : 3 के अनुपात में विभाजित करता है।", b))
+
+s1, P1 = secsteps(1, 2, (4, -1), (-2, -3))
+s2, P2 = secsteps(2, 1, (4, -1), (-2, -3))
+assert P1 == (2, F(-5, 3)) and P2 == (0, F(-7, 3))
+b = SEC + p("A(4, −1), B(−2, −3)। सम-त्रिभाजन बिंदु P और Q रेखाखंड को 1 : 2 और 2 : 1 में बाँटते हैं।")
+b += part("P (1 : 2)", s1) + part("Q (2 : 1)", s2)
+b += "<div class='vt'>जाँच:</div>" + p("PQ का मध्य-बिंदु AB के मध्य-बिंदु के बराबर होना चाहिए: " + m("\\left(\\dfrac{2+0}{2},\\dfrac{-\\frac53-\\frac73}{2}\\right)=(1,-2)") + " और " + m("\\left(\\dfrac{4-2}{2},\\dfrac{-1-3}{2}\\right)=(1,-2)") + " ✔")
+b += ans("सम-त्रिभाजन बिंदु: (i) " + pt(*P1) + " (ii) " + pt(*P2))
+EX72.append(("बिंदुओं (4, −1) और (−2, −3) को जोड़ने वाले रेखाखंड को सम-त्रिभाजित करने वाले बिंदुओं के निर्देशांक ज्ञात कीजिए।", b))
+
+# Q3 sports ground
+G, R = (2, 25), (8, 20)
+assert d2(G, R) == 61
+grid = "".join(f"<line x1='{30 + i * 28}' y1='20' x2='{30 + i * 28}' y2='200' stroke='#e3e7f3'/>" for i in range(11))
+f = fig(340, 225, {"A": (30, 200, -10, 14), "D": (30, 20, -10, 0), "G": (86, 155, -10, -6), "R": (254, 164, 12, -6), "B": (170, 160, 0, -9)},
+        [("A", "D")], dashed=[("G", "R")], extra=grid,
+        labels=[(86, 216, "2"), (254, 216, "8"), (170, 216, "पंक्ति (x) →")], caption="हरी झंडी G(2, 25), लाल झंडी R(8, 20), नीली झंडी B मध्य-बिंदु")
+s = f + p("A को मूल-बिंदु, AB को x-अक्ष (पंक्तियाँ) और AD को y-अक्ष (गमले, 1 m के अंतर पर, कुल 100 m) लीजिए।")
+s += lines("\\text{निहारिका: }\\tfrac14\\times100", "25\\ \\text{m}") + p("दूसरी पंक्ति पर, इसलिए हरी झंडी G(2, 25)")
+s += lines("\\text{प्रीत: }\\tfrac15\\times100", "20\\ \\text{m}") + p("आठवीं पंक्ति पर, इसलिए लाल झंडी R(8, 20)")
+s += DIST + dist("G", G, "R", R, "\\sqrt{61}")
+s += p("नीली झंडी GR के मध्य-बिंदु पर:") + lines("B", "\\left(\\dfrac{2+8}{2},\\dfrac{25+20}{2}\\right)", "(5,\\ 22.5)")
+s += ans("(i) दोनों झंडियों के बीच की दूरी √61 m है। (ii) नीली झंडी पाँचवीं पंक्ति पर AD की दिशा में 22.5 m की दूरी पर लगानी चाहिए।")
+EX72.append(("आपके स्कूल में खेलकूद क्रियाकलाप आयोजित करने के लिए, एक आयताकार मैदान ABCD में, चूने से परस्पर 1 m की दूरी पर पंक्तियाँ बनाई गई हैं। AD के अनुदिश परस्पर 1 m की दूरी पर 100 गमले रखे गए हैं। निहारिका दूसरी पंक्ति में AD के 1/4 भाग के बराबर की दूरी दौड़ती है और वहाँ एक हरा झंडा गाड़ देती है। प्रीत आठवीं पंक्ति में AD के 1/5 भाग के बराबर की दूरी दौड़ती है और वहाँ एक लाल झंडा गाड़ देती है। दोनों झंडों के बीच की दूरी कितनी है? यदि रश्मि को एक नीला झंडा इन दोनों झंडों को मिलाने वाले रेखाखंड पर ठीक आधी दूरी पर गाड़ना हो, तो उसे अपना झंडा कहाँ गाड़ना चाहिए?", SEC + s))
+
+assert sec(2, 7, (-3, 10), (6, -8)) == (-1, 6)
+s = SEC + p("मान लीजिए P(−1, 6) बिंदुओं A(−3, 10) और B(6, −8) को k : 1 में बाँटता है।")
+s += eqs(("\\dfrac{6k-3}{k+1}", "-1"), ("6k-3", "-k-1"), ("7k", "2"), ("k", "\\dfrac27"))
+s += p("अतः अनुपात " + m("\\tfrac27:1") + " = 2 : 7")
+s += "<div class='vt'>जाँच (y-निर्देशांक से):</div>" + lines("y", "\\dfrac{2\\times(-8)+7\\times10}{2+7}", "\\dfrac{54}{9}", "6") + ok("y = 6 ✔")
+s += ans("अनुपात 2 : 7 (अंतःविभाजन)")
+EX72.append(("बिंदुओं (−3, 10) और (6, −8) को जोड़ने वाले रेखाखंड को बिंदु (−1, 6) किस अनुपात में विभाजित करता है?", s))
+
+assert sec(1, 1, (1, -5), (-4, 5)) == (F(-3, 2), 0)
+s = SEC + p("मान लीजिए x-अक्ष, A(1, −5) और B(−4, 5) को k : 1 में बाँटता है। x-अक्ष पर y = 0 होता है।")
+s += eqs(("\\dfrac{5k-5}{k+1}", "0"), ("5k-5", "0"), ("k", "1"))
+s += p("अनुपात 1 : 1, अर्थात् x-अक्ष AB को समद्विभाजित करता है।") + lines("x", "\\dfrac{1\\times(-4)+1\\times1}{2}", "-\\dfrac32")
+s += ans("(i) अनुपात 1 : 1 (ii) विभाजन बिंदु " + pt(F(-3, 2), 0))
+EX72.append(("वह अनुपात ज्ञात कीजिए जिसमें A(1, −5) और B(−4, 5) को मिलाने वाला रेखाखंड x-अक्ष से विभाजित होता है। इस विभाजन बिंदु के निर्देशांक भी ज्ञात कीजिए।", s))
+
+s = SEC + p("मान लीजिए A(1, 2), B(4, y), C(x, 6), D(3, 5)। समांतर चतुर्भुज के विकर्ण परस्पर समद्विभाजित करते हैं, इसलिए AC का मध्य-बिंदु = BD का मध्य-बिंदु।")
+s += eqs(("\\left(\\dfrac{1+x}{2},\\dfrac{2+6}{2}\\right)", "\\left(\\dfrac{4+3}{2},\\dfrac{y+5}{2}\\right)"))
+s += p("x-निर्देशांक बराबर रखने पर:") + eqs(("1+x", "7"), ("x", "6"))
+s += p("y-निर्देशांक बराबर रखने पर:") + eqs(("8", "y+5"), ("y", "3"))
+assert ((1 + 6) / 2, 4) == ((4 + 3) / 2, (3 + 5) / 2)
+s += "<div class='vt'>जाँच:</div>" + p("AC का मध्य-बिंदु (3.5, 4), BD का मध्य-बिंदु (3.5, 4) ✔") + ans("(i) x = 6 (ii) y = 3")
+EX72.append(("यदि (1, 2), (4, y), (x, 6) और (3, 5), इसी क्रम में लिए जाने पर, एक समांतर चतुर्भुज के शीर्ष हों तो x और y ज्ञात कीजिए।", s))
+
+s = SEC + p("केंद्र O(2, −3) व्यास AB का मध्य-बिंदु है, B(1, 4)। मान लीजिए A(x, y)।")
+s += eqs(("\\dfrac{x+1}{2}", "2"), ("x", "3")) + eqs(("\\dfrac{y+4}{2}", "-3"), ("y", "-10"))
+assert ((3 + 1) / 2, (-10 + 4) / 2) == (2, -3)
+s += "<div class='vt'>जाँच:</div>" + p("A(3, −10) और B(1, 4) का मध्य-बिंदु " + m("\\left(\\dfrac{4}{2},\\dfrac{-6}{2}\\right)=(2,-3)") + " ✔") + ans("A के निर्देशांक (3, −10) हैं।")
+EX72.append(("बिंदु A के निर्देशांक ज्ञात कीजिए, जहाँ AB एक वृत्त का व्यास है जिसका केंद्र (2, −3) है तथा B के निर्देशांक (1, 4) हैं।", s))
+
+s1, P8 = secsteps(3, 4, (-2, -2), (2, -4))
+assert P8 == (F(-2, 7), F(-20, 7))
+s = SEC + p("A(−2, −2), B(2, −4) और " + m("AP=\\tfrac37AB") + ", इसलिए " + m("PB=\\tfrac47AB") + ", अर्थात् AP : PB = 3 : 4") + s1 + ans("P के निर्देशांक " + pt(*P8) + " हैं।")
+EX72.append(("यदि A और B क्रमशः (−2, −2) और (2, −4) हों तो बिंदु P के निर्देशांक ज्ञात कीजिए ताकि AP = (3/7) AB हो और P रेखाखंड AB पर स्थित हो।", s))
+
+A9, B9 = (-2, 2), (2, 8)
+Q9 = sec(1, 1, A9, B9)
+P9 = sec(1, 1, A9, Q9)
+R9 = sec(1, 1, Q9, B9)
+assert (P9, Q9, R9) == ((-1, F(7, 2)), (0, 5), (1, F(13, 2)))
+s = SEC + p("A(−2, 2), B(2, 8)। बिंदु P, Q, R रेखाखंड को चार बराबर भागों में बाँटते हैं: Q, AB का मध्य-बिंदु; P, AQ का मध्य-बिंदु; R, QB का मध्य-बिंदु।")
+s += lines("Q", "\\left(\\dfrac{-2+2}{2},\\dfrac{2+8}{2}\\right)", "(0,\\ 5)")
+s += lines("P", "\\left(\\dfrac{-2+0}{2},\\dfrac{2+5}{2}\\right)", "\\left(-1,\\ \\dfrac72\\right)")
+s += lines("R", "\\left(\\dfrac{0+2}{2},\\dfrac{5+8}{2}\\right)", "\\left(1,\\ \\dfrac{13}{2}\\right)")
+s += ans("(i) P " + pt(*P9) + " (ii) Q (0, 5) (iii) R " + pt(*R9))
+EX72.append(("A(−2, 2) और B(2, 8) को जोड़ने वाले रेखाखंड AB को चार बराबर भागों में विभाजित करने वाले बिंदुओं के निर्देशांक ज्ञात कीजिए।", s))
+
+A10, B10, C10, D10 = (3, 0), (4, 5), (-1, 4), (-2, -1)
+assert d2(A10, C10) == 32 and d2(B10, D10) == 72
+s = DIST + formula("समचतुर्भुज का क्षेत्रफल", m("\\tfrac12\\times d_1\\times d_2") + " (d₁, d₂ विकर्ण)")
+s += p("A(3, 0), B(4, 5), C(−1, 4), D(−2, −1)") + dist("A", A10, "C", C10, "4\\sqrt2") + dist("B", B10, "D", D10, "6\\sqrt2")
+s += lines("\\text{क्षेत्रफल}", "\\dfrac12\\times4\\sqrt2\\times6\\sqrt2", "\\dfrac12\\times24\\times2", "24")
+s += ans("समचतुर्भुज का क्षेत्रफल 24 वर्ग मात्रक है।")
+EX72.append(("एक समचतुर्भुज का क्षेत्रफल ज्ञात कीजिए, जिसके शीर्ष इसी क्रम में (3, 0), (4, 5), (−1, 4) और (−2, −1) हैं। [संकेत: समचतुर्भुज का क्षेत्रफल = 1/2 (उसके विकर्णों का गुणनफल)]", s))
+
+EX71, EX72 = ([(qt(t), b_) for t, b_ in L] for L in (EX71, EX72))
+page(BASE, 7, CH, "exercise-7-1", "प्रश्नावली 7.1", "कक्षा 10 गणित · अध्याय 7: निर्देशांक ज्यामिति · 10 प्रश्न (दूरी सूत्र)", EX71,
+     (BASE, "अध्याय 7"), (BASE + "exercise-7-2/", "प्रश्नावली 7.2"))
+page(BASE, 7, CH, "exercise-7-2", "प्रश्नावली 7.2", "कक्षा 10 गणित · अध्याय 7: निर्देशांक ज्यामिति · 10 प्रश्न (विभाजन सूत्र)", EX72,
+     (BASE + "exercise-7-1/", "प्रश्नावली 7.1"), (BASE, "अध्याय 7"))
+print("ok")

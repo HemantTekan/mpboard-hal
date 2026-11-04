@@ -495,7 +495,30 @@
         "hi": "निर्देशांक ज्यामिति",
         "en": "Coordinate Geometry"
        },
-       "items": []
+       "items": [
+        {
+         "slug": "exercise-7-1",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 7.1",
+          "en": "Exercise 7.1"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-07/exercise-7-1/"
+         }
+        },
+        {
+         "slug": "exercise-7-2",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 7.2",
+          "en": "Exercise 7.2"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-07/exercise-7-2/"
+         }
+        }
+       ]
       },
       {
        "num": 8,
