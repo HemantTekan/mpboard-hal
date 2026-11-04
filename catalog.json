@@ -576,7 +576,30 @@
         "hi": "वृत्त",
         "en": "Circles"
        },
-       "items": []
+       "items": [
+        {
+         "slug": "exercise-10-1",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 10.1",
+          "en": "Exercise 10.1"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-10/exercise-10-1/"
+         }
+        },
+        {
+         "slug": "exercise-10-2",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 10.2",
+          "en": "Exercise 10.2"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-10/exercise-10-2/"
+         }
+        }
+       ]
       },
       {
        "num": 11,

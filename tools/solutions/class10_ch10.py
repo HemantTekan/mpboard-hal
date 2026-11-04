@@ -1,0 +1,359 @@
+#!/usr/bin/env python3
+"""Class 10 Maths, Chapter 10 (वृत्त): Exercise 10.1, 10.2 (rationalised), Hindi medium.
+Run from repo root: python3 tools/solutions/class10_ch10.py
+"""
+import sys, pathlib, re as _re
+from fractions import Fraction as F
+sys.path.insert(0, str(pathlib.Path(__file__).parent))
+from common import *  # noqa
+from common import _LAB
+
+BASE = "/hi/class-10/maths/chapter-10/"
+CH = "वृत्त"
+_DEV = _re.compile(r"[\u0900-\u097F]")
+
+
+def mc(c):
+    c = str(c)
+    if not _DEV.search(c):
+        return mcell(c)
+    out = []
+    for i, piece in enumerate(_re.split(r"\\text\{([^}]*)\}", c)):
+        if i % 2:
+            out.append(piece)
+        elif piece.strip().strip("\\").strip():
+            out.append("\\(" + piece.strip().rstrip("\\").strip() + "\\)")
+    return " ".join(out)
+
+
+def lines(head, *rest):
+    head, rest = mc(head), [mc(r) for r in rest]
+    out = f"<span class='l'>{head}</span><span class='s'>=</span><span class='r'>{rest[0]}</span>"
+    out += "".join(f"<span class='l'></span><span class='s'>=</span><span class='r'>{r}</span>" for r in rest[1:])
+    return "<div class='eq'>" + out + "</div>"
+
+
+def eqs(*pairs):
+    rows = "".join(f"<span class='l'>{mc(a)}</span><span class='s'>=</span><span class='r'>{mc(b)}</span>" for a, b in pairs)
+    return "<div class='eq'>" + rows + "</div>"
+
+
+def p(t):
+    return f"<p>{t}</p>"
+
+
+def ok(t):
+    return f"<p class='ok'>{t}</p>"
+
+
+def qt(t):
+    marks = [mm.start() for mm in _LAB.finditer(t)]
+    if len(marks) < 2:
+        return t
+    pre = t[:marks[0]].strip()
+    segs = [t[x:y].strip() for x, y in zip(marks, marks[1:] + [len(t)])]
+    return pre + "".join(f"<span style='display:block;font-weight:500;margin-top:4px'>{x}</span>" for x in segs)
+
+
+def gp(dia, sid, extra=None):
+    """दिया है / सिद्ध करना है boxes."""
+    h = (f"<div class='gv'><div class='box k'><b>दिया है</b><div>{dia}</div></div>"
+         f"<div class='box f'><b>{'सिद्ध करना है' if extra is None else extra}</b><div>{sid}</div></div></div>")
+    return h
+
+
+def pf(*rows):
+    """उपपत्ति: each row is (statement, reason); the reason sits on its own small line."""
+    out = "<div class='vt'>उपपत्ति:</div><div style='margin:6px 0 4px'>"
+    for st, rs in rows:
+        out += ("<div style='padding:6px 0;border-bottom:1px dashed #e3e7f3'>"
+                f"<div>{st}</div>" + (f"<div style='font-size:.88em;color:#5a6275'>({rs})</div>" if rs else "") + "</div>")
+    return out + "</div>"
+
+
+def r(a, b):
+    return m(f"\\dfrac{{{a}}}{{{b}}}")
+
+
+def T(x):
+    return m("\\triangle " + x)
+
+
+def A(x):
+    return m("\\angle " + x)
+
+
+def fig(W, H, pts, segs, dashed=(), labels=(), extra="", caption=""):
+    """Small geometry figure. pts: name -> (x, y, dx, dy) where (dx, dy) shifts the letter."""
+    g = [f"<svg class='graph' viewBox='0 0 {W} {H}' role='img' aria-label='{caption or 'आकृति'}' style='max-width:{min(W, 340)}px'>"]
+    for a, b in segs:
+        (x1, y1, *_), (x2, y2, *_) = pts[a], pts[b]
+        g.append(f"<line x1='{x1}' y1='{y1}' x2='{x2}' y2='{y2}' stroke='#1d3a8a' stroke-width='2'/>")
+    for a, b in dashed:
+        (x1, y1, *_), (x2, y2, *_) = pts[a], pts[b]
+        g.append(f"<line x1='{x1}' y1='{y1}' x2='{x2}' y2='{y2}' stroke='#c2410c' stroke-width='1.8' stroke-dasharray='5 4'/>")
+    g.append(extra)
+    for n, (x, y, dx, dy) in pts.items():
+        g.append(f"<circle cx='{x}' cy='{y}' r='2.6' fill='#1d3a8a'/><text x='{x + dx}' y='{y + dy}' font-size='15' font-weight='700' fill='#111' text-anchor='middle'>{n}</text>")
+    for x, y, t in labels:
+        g.append(f"<text x='{x}' y='{y}' font-size='12.5' fill='#b4232a' text-anchor='middle'>{t}</text>")
+    g.append("</svg>")
+    cap = f"<div style='font-size:.85em;color:#5a6275;margin-top:2px'>{caption}</div>" if caption else ""
+    return "<div style='margin:8px 0'>" + "".join(g) + cap + "</div>"
+
+
+import math
+
+
+def close(a, b):
+    assert abs(a - b) < 1e-9, (a, b)
+
+
+def circ(cx, cy, r):
+    return f"<circle cx='{cx}' cy='{cy}' r='{r}' fill='none' stroke='#0f766e' stroke-width='2'/>"
+
+
+def on(cx, cy, r, deg):
+    t = math.radians(deg)
+    return (round(cx + r * math.cos(t), 1), round(cy - r * math.sin(t), 1))
+
+
+def P_(xy, dx=0, dy=-8):
+    return (xy[0], xy[1], dx, dy)
+
+
+def tangents(cx, cy, r, px, py):
+    """points of contact from external point (px, py)."""
+    d = math.hypot(px - cx, py - cy)
+    base = math.atan2(-(py - cy), px - cx)
+    a = math.acos(r / d)
+    return [on(cx, cy, r, math.degrees(base + s * a)) for s in (1, -1)]
+
+
+def tanpoly(cx, cy, r, angs, names, tnames=None):
+    """polygon circumscribing circle: tangent points at angs (deg, ccw order). returns pts dict."""
+    pts = {}
+    n = len(angs)
+    for i in range(n):
+        a1, a2 = angs[i], angs[(i + 1) % n]
+        d = (a2 - a1) % 360
+        mid = a1 + d / 2
+        dist = r / math.cos(math.radians(d / 2))
+        x, y = on(cx, cy, dist, mid)
+        ux, uy = (x - cx) / dist, (y - cy) / dist
+        pts[names[i]] = (x, y, round(ux * 13), round(uy * 13 + 5))
+    if tnames:
+        for a, t in zip(angs, tnames):
+            x, y = on(cx, cy, r, a)
+            ux, uy = (x - cx) / r, (y - cy) / r
+            pts[t] = (x, y, round(ux * 12), round(uy * 12 + 5))
+    return pts
+
+
+TT = formula("प्रमेय 10.1", "वृत्त के किसी बिंदु पर स्पर्श रेखा, स्पर्श बिंदु से जाने वाली त्रिज्या पर लंब होती है।")
+T2 = formula("प्रमेय 10.2", "बाह्य बिंदु से वृत्त पर खींची गई स्पर्श रेखाओं की लंबाइयाँ बराबर होती हैं।")
+PY = formula("पाइथागोरस प्रमेय", "", [m("\\text{कर्ण}^2=\\text{आधार}^2+\\text{लंब}^2")])
+
+EX1, EX2 = [], []
+
+# ===================== 10.1
+EX1.append(("एक वृत्त की कितनी स्पर्श रेखाएँ हो सकती हैं?",
+            p("वृत्त के प्रत्येक बिंदु पर ठीक एक स्पर्श रेखा होती है और वृत्त पर अपरिमित (अनंत) बिंदु होते हैं।") + ans("एक वृत्त की अपरिमित रूप से अनेक (अनंत) स्पर्श रेखाएँ हो सकती हैं।")))
+
+s = part("(i)", p("स्पर्श रेखा वृत्त को केवल एक बिंदु पर छूती है।") + ans("एक"))
+s += part("(ii)", p("जो रेखा वृत्त को दो बिंदुओं पर काटती है, उसे छेदक रेखा कहते हैं।") + ans("छेदक रेखा"))
+s += part("(iii)", p("किसी व्यास के दोनों सिरों पर खींची गई स्पर्श रेखाएँ समांतर होती हैं; किसी एक दिशा में ऐसी अधिक-से-अधिक दो ही होती हैं।") + ans("दो"))
+s += part("(iv)", p("स्पर्श रेखा और वृत्त के उभयनिष्ठ बिंदु को स्पर्श बिंदु कहते हैं।") + ans("स्पर्श बिंदु"))
+EX1.append(("रिक्त स्थानों की पूर्ति कीजिए: (i) किसी वृत्त की स्पर्श रेखा उसे ______ बिंदुओं पर प्रतिच्छेद करती है। (ii) वृत्त को दो बिंदुओं पर प्रतिच्छेद करने वाली रेखा को ______ कहते हैं। (iii) एक वृत्त की ______ समांतर स्पर्श रेखाएँ हो सकती हैं। (iv) वृत्त तथा उसकी स्पर्श रेखा के उभयनिष्ठ बिंदु को ______ कहते हैं।", s))
+
+close(math.sqrt(12**2 - 5**2), math.sqrt(119))
+cx, cy, R = 90, 110, 60
+Pp = on(cx, cy, R, 70)
+# tangent at P: direction perpendicular to OP; Q on it with OQ = 12/5 * R
+k = math.sqrt((12 / 5) ** 2 - 1) * R
+dx, dy = math.sin(math.radians(70)), math.cos(math.radians(70))
+Qp = (round(Pp[0] + k * dx, 1), round(Pp[1] + k * dy, 1))
+f = fig(340, 200, {"O": (cx, cy, -10, 14), "P": P_(Pp, -4, -10), "Q": P_(Qp, 12, 4)}, [("O", "P"), ("P", "Q"), ("O", "Q")],
+        labels=[(70, 80, "5 cm"), ((cx + Qp[0]) / 2, (cy + Qp[1]) / 2 + 16, "12 cm")], extra=circ(cx, cy, R), caption="OP ⊥ PQ")
+s = f + p("OP = 5 cm (त्रिज्या), OQ = 12 cm। स्पर्श बिंदु P पर त्रिज्या स्पर्श रेखा पर लंब होती है, इसलिए ∠OPQ = 90°।") + TT + PY
+s += p("समकोण ΔOPQ में:") + eqs(("OQ^2", "OP^2+PQ^2"), ("12^2", "5^2+PQ^2"), ("PQ^2", "144-25"), ("PQ^2", "119"), ("PQ", "\\sqrt{119}\\ \\text{cm}"))
+s += "<div class='vt'>जाँच:</div>" + p(m("5^2+(\\sqrt{119})^2=25+119=144=12^2") + " ✔") + ans("(D) √119 cm")
+EX1.append(("5 cm त्रिज्या वाले एक वृत्त के बिंदु P पर स्पर्श रेखा PQ केंद्र O से जाने वाली एक रेखा से बिंदु Q पर इस प्रकार मिलती है कि OQ = 12 cm। PQ की लंबाई है: (A) 12 cm (B) 13 cm (C) 8.5 cm (D) √119 cm", s))
+
+cx, cy, R = 150, 100, 55
+f = fig(340, 200, {"O": (cx, cy, -10, 14), "T": (cx, cy - R, 0, -8), "A": (cx - 70, cy + 25, 0, 16), "B": (cx + 70, cy + 25, 0, 16)}, [],
+        extra=circ(cx, cy, R) + f"<line x1='20' y1='{cy - R}' x2='320' y2='{cy - R}' stroke='#1d3a8a' stroke-width='2'/>"
+        + f"<line x1='20' y1='{cy + 25}' x2='320' y2='{cy + 25}' stroke='#7c3aed' stroke-width='2'/>"
+        + f"<line x1='20' y1='190' x2='320' y2='190' stroke='#b4232a' stroke-width='2' stroke-dasharray='6 4'/>",
+        labels=[(300, cy - R - 6, "स्पर्श रेखा"), (300, cy + 19, "छेदक"), (300, 184, "दी गई रेखा l")], caption="दोनों रेखाएँ l के समांतर")
+s = p("रचना के चरण:") + p("1. केंद्र O लेकर कोई वृत्त खींचिए और एक रेखा l खींचिए।") + p("2. O से l पर लंब खींचिए; यह वृत्त को T पर काटता है।")
+s += p("3. T से होकर l के समांतर रेखा खींचिए। यह OT पर लंब है, इसलिए वृत्त को केवल T पर छूती है, अर्थात् स्पर्श रेखा है।")
+s += p("4. O और l के बीच, केंद्र से त्रिज्या से कम दूरी पर l के समांतर दूसरी रेखा खींचिए। यह वृत्त को दो बिंदुओं A और B पर काटती है, अर्थात् छेदक रेखा है।") + f
+s += ans("ऊपर की आकृति में T से जाने वाली रेखा स्पर्श रेखा और AB छेदक रेखा है; दोनों दी गई रेखा l के समांतर हैं।")
+EX1.append(("एक वृत्त खींचिए और एक दी गई रेखा के समांतर दो ऐसी रेखाएँ खींचिए कि उनमें से एक स्पर्श रेखा हो तथा दूसरी छेदक रेखा हो।", s))
+
+# ===================== 10.2
+close(math.sqrt(25**2 - 24**2), 7)
+cx, cy, R = 80, 100, 40
+Qx = 300; c1, c2 = tangents(cx, cy, R, Qx, cy)
+f = fig(340, 200, {"O": (cx, cy, -10, 14), "P": P_(c1, 0, -8), "Q": (Qx, cy, 10, 4)}, [("O", "P"), ("P", "Q"), ("O", "Q")],
+        labels=[(190, 60, "24 cm"), (190, cy + 16, "25 cm")], extra=circ(cx, cy, R), caption="OP ⊥ PQ")
+s = f + TT + p("समकोण ΔOPQ में:") + eqs(("OQ^2", "OP^2+PQ^2"), ("25^2", "r^2+24^2"), ("r^2", "625-576"), ("r^2", "49"), ("r", "7\\ \\text{cm}"))
+s += "<div class='vt'>जाँच:</div>" + p(m("7^2+24^2=49+576=625=25^2") + " ✔") + ans("(A) 7 cm")
+EX2.append(("एक बिंदु Q से एक वृत्त पर स्पर्श रेखा की लंबाई 24 cm तथा Q की केंद्र से दूरी 25 cm है। वृत्त की त्रिज्या है: (A) 7 cm (B) 12 cm (C) 15 cm (D) 24.5 cm", s))
+
+cx, cy, R = 100, 100, 60
+c1, c2 = tangents(cx, cy, R, 300, cy)
+f = fig(340, 200, {"O": (cx, cy, -12, 4), "P": P_(c1), "Q": P_(c2, 0, 16), "T": (300, cy, 10, 4)}, [("O", "P"), ("O", "Q"), ("P", "T"), ("Q", "T")],
+        labels=[(122, 104, "110°"), (270, 104, "?")], extra=circ(cx, cy, R), caption="TP और TQ स्पर्श रेखाएँ")
+s = f + TT + p("OP ⊥ TP और OQ ⊥ TQ, इसलिए ∠OPT = ∠OQT = 90°। चतुर्भुज OPTQ के कोणों का योग 360° है:")
+s += eqs(("\\angle PTQ+90^\\circ+110^\\circ+90^\\circ", "360^\\circ"), ("\\angle PTQ", "360^\\circ-290^\\circ"), ("\\angle PTQ", "70^\\circ"))
+s += "<div class='vt'>जाँच:</div>" + p(m("70^\\circ+110^\\circ=180^\\circ") + " (संपूरक, जैसा प्र.10 में सिद्ध है) ✔") + ans("(B) 70°")
+EX2.append(("यदि TP और TQ केंद्र O वाले किसी वृत्त पर दो स्पर्श रेखाएँ इस प्रकार हैं कि ∠POQ = 110°, तो ∠PTQ बराबर है: (A) 60° (B) 70° (C) 80° (D) 90°", s))
+
+f = fig(340, 200, {"O": (cx, cy, -12, 4), "A": P_(c1), "B": P_(c2, 0, 16), "P": (300, cy, 10, 4)}, [("O", "A"), ("O", "B"), ("P", "A"), ("P", "B")], dashed=[("O", "P")],
+        labels=[(268, 104, "80°")], extra=circ(cx, cy, R), caption="PA और PB स्पर्श रेखाएँ")
+s = f + TT + p("चतुर्भुज OAPB में ∠OAP = ∠OBP = 90°, इसलिए") + eqs(("\\angle AOB", "360^\\circ-90^\\circ-90^\\circ-80^\\circ"), ("\\angle AOB", "100^\\circ"))
+s += p("ΔOAP ≅ ΔOBP (OA = OB, PA = PB, OP उभयनिष्ठ; SSS), इसलिए OP, ∠AOB को समद्विभाजित करती है:") + eqs(("\\angle POA", "\\dfrac{100^\\circ}{2}"), ("\\angle POA", "50^\\circ"))
+s += "<div class='vt'>जाँच (ΔOAP के कोण):</div>" + p(m("90^\\circ+50^\\circ+40^\\circ=180^\\circ") + " ✔") + ans("(A) 50°")
+EX2.append(("यदि एक बिंदु P से O केंद्र वाले किसी वृत्त पर PA, PB स्पर्श रेखाएँ परस्पर 80° के कोण पर झुकी हों, तो ∠POA बराबर है: (A) 50° (B) 60° (C) 70° (D) 80°", s))
+
+cx, cy, R = 170, 100, 55
+f = fig(340, 200, {"O": (cx, cy, 12, 4), "A": (cx, cy - R, 10, -6), "B": (cx, cy + R, 10, 16)}, [("A", "B")],
+        extra=circ(cx, cy, R) + f"<line x1='40' y1='{cy - R}' x2='300' y2='{cy - R}' stroke='#1d3a8a' stroke-width='2'/><line x1='40' y1='{cy + R}' x2='300' y2='{cy + R}' stroke='#1d3a8a' stroke-width='2'/>",
+        labels=[(52, cy - R - 6, "P"), (290, cy - R - 6, "Q"), (52, cy + R - 6, "R"), (290, cy + R - 6, "S")], caption="AB व्यास, PQ और RS स्पर्श रेखाएँ")
+s = f + gp("केंद्र O वाले वृत्त का व्यास AB; A पर स्पर्श रेखा PQ और B पर स्पर्श रेखा RS", "PQ ∥ RS") + TT
+s += pf(("OA ⊥ PQ, इसलिए ∠OAQ = 90° …(1)", "प्रमेय 10.1"), ("OB ⊥ RS, इसलिए ∠OBR = 90° …(2)", "प्रमेय 10.1"),
+        ("(1) और (2) से ∠BAQ = ∠ABR = 90°", "AB रेखा पर ही O है"), ("ये AB तिर्यक रेखा के एकांतर कोण हैं और बराबर हैं, अतः PQ ∥ RS", "एकांतर कोण बराबर हों तो रेखाएँ समांतर"))
+EX2.append(("सिद्ध कीजिए कि किसी वृत्त के किसी व्यास के सिरों पर खींची गई स्पर्श रेखाएँ समांतर होती हैं।", s + ok("इति सिद्धम्")))
+
+cx, cy, R = 150, 110, 60
+Pp = (cx, cy - R)
+f = fig(340, 200, {"O": (cx, cy, 12, 4), "P": (cx, cy - R, 10, -6), "Q": (cx - 45, cy + 18, -10, 4)}, [("P", "O")], dashed=[("P", "Q"), ("Q", "O")],
+        extra=circ(cx, cy, R) + f"<line x1='40' y1='{cy - R}' x2='280' y2='{cy - R}' stroke='#1d3a8a' stroke-width='2'/>",
+        labels=[(60, cy - R - 6, "A"), (270, cy - R - 6, "B")], caption="AB स्पर्श रेखा, P स्पर्श बिंदु")
+s = f + gp("केंद्र O वाले वृत्त की P पर स्पर्श रेखा AB; P पर AB का लंब PX", "PX केंद्र O से होकर जाता है") + TT
+s += pf(("मान लीजिए लंब PX केंद्र O से न जाकर किसी अन्य बिंदु Q से जाता है। तब ∠QPB = 90° …(1)", "कल्पना"),
+        ("OP त्रिज्या है और AB स्पर्श रेखा है, इसलिए ∠OPB = 90° …(2)", "प्रमेय 10.1"),
+        ("(1) और (2) से ∠QPB = ∠OPB, अर्थात् भाग, संपूर्ण के बराबर हो गया", ""),
+        ("यह तभी संभव है जब Q और O एक ही हों, अतः P पर स्पर्श रेखा का लंब केंद्र O से होकर जाता है", ""))
+EX2.append(("सिद्ध कीजिए कि स्पर्श बिंदु से स्पर्श रेखा पर खींचा गया लंब वृत्त के केंद्र से होकर जाता है।", s + ok("इति सिद्धम्")))
+
+close(math.sqrt(25 - 16), 3)
+cx, cy, R = 80, 100, 45
+c1, c2 = tangents(cx, cy, R, 300, cy)
+f = fig(340, 200, {"O": (cx, cy, -10, 14), "P": P_(c1), "A": (300, cy, 10, 4)}, [("O", "P"), ("P", "A"), ("O", "A")],
+        labels=[(190, 66, "4 cm"), (190, cy + 16, "5 cm")], extra=circ(cx, cy, R), caption="AP स्पर्श रेखा")
+s = f + TT + p("OP ⊥ AP, इसलिए समकोण ΔOPA में:") + eqs(("OA^2", "OP^2+AP^2"), ("5^2", "r^2+4^2"), ("r^2", "25-16"), ("r^2", "9"), ("r", "3\\ \\text{cm}"))
+s += "<div class='vt'>जाँच:</div>" + p(m("3^2+4^2=9+16=25=5^2") + " ✔") + ans("वृत्त की त्रिज्या 3 cm है।")
+EX2.append(("केंद्र से 5 cm की दूरी पर स्थित एक बिंदु A से किसी वृत्त पर स्पर्श रेखा की लंबाई 4 cm है। वृत्त की त्रिज्या ज्ञात कीजिए।", s))
+
+close(2 * math.sqrt(25 - 9), 8)
+cx, cy = 170, 105; Rb, Rs = 85, 51
+Px = math.sqrt(Rb**2 - Rs**2)
+f = fig(340, 210, {"O": (cx, cy, 0, -8), "P": (cx, cy + Rs, 0, 16), "A": (cx - Px, cy + Rs, -10, 6), "B": (cx + Px, cy + Rs, 10, 6)}, [("A", "B"), ("O", "P"), ("O", "B")],
+        labels=[(162, 132, "3"), (216, 128, "5")], extra=circ(cx, cy, Rb) + circ(cx, cy, Rs), caption="AB बड़े वृत्त की जीवा, छोटे वृत्त को P पर छूती है")
+s = f + p("मान लीजिए बड़े वृत्त की जीवा AB छोटे वृत्त को P पर छूती है। OP = 3 cm, OB = 5 cm।") + TT
+s += p("OP ⊥ AB, इसलिए समकोण ΔOPB में:") + eqs(("OB^2", "OP^2+PB^2"), ("PB^2", "25-9"), ("PB^2", "16"), ("PB", "4\\ \\text{cm}"))
+s += p("केंद्र से जीवा पर डाला गया लंब जीवा को समद्विभाजित करता है, इसलिए AP = PB:") + lines("AB", "2\\times PB", "2\\times4", "8\\ \\text{cm}")
+s += "<div class='vt'>जाँच:</div>" + p(m("3^2+4^2=25=5^2") + " ✔") + ans("जीवा की लंबाई 8 cm है।")
+EX2.append(("दो संकेंद्रीय वृत्तों की त्रिज्याएँ 5 cm तथा 3 cm हैं। बड़े वृत्त की उस जीवा की लंबाई ज्ञात कीजिए जो छोटे वृत्त को स्पर्श करती हो।", s))
+
+# Q8 quadrilateral circumscribing
+cx, cy, R = 170, 105, 60
+pts8 = tanpoly(170, 105, 60, [90, 195, 262, 340], ["A", "D", "C", "B"], ["P", "S", "R", "Q"])
+f = fig(340, 210, pts8, [("A", "B"), ("B", "C"), ("C", "D"), ("D", "A")], extra=circ(170, 105, 60), caption="P, Q, R, S स्पर्श बिंदु")
+s = f + gp("चतुर्भुज ABCD की भुजाएँ AB, BC, CD, DA वृत्त को क्रमशः P, Q, R, S पर छूती हैं", "AB + CD = AD + BC") + T2
+s += pf(("AP = AS, BP = BQ, CR = CQ, DR = DS …(1)", "बाह्य बिंदु से खींची स्पर्श रेखाएँ बराबर"),
+        ("AB + CD = (AP + PB) + (CR + RD)", ""), ("= AS + BQ + CQ + DS", "(1) से"), ("= (AS + DS) + (BQ + CQ)", "पुनर्व्यवस्थित करने पर"),
+        ("= AD + BC", ""))
+EX2.append(("एक वृत्त के परिगत एक चतुर्भुज ABCD खींचा गया है। सिद्ध कीजिए: AB + CD = AD + BC", s + ok("इति सिद्धम्")))
+
+# Q9
+cx, cy, R = 170, 105, 60
+Cc = on(cx, cy, R, 30)
+# tangent at C, intersect y=cy-R (XY) and y=cy+R (X'Y')
+tx, ty = -math.sin(math.radians(30)), -math.cos(math.radians(30))  # direction along tangent
+def hit(yv):
+    t = (yv - Cc[1]) / ty
+    return (round(Cc[0] + t * tx, 1), yv)
+Ah, Bh = hit(cy - R), hit(cy + R)
+f = fig(340, 210, {"O": (cx, cy, -12, 4), "A": (Ah[0], Ah[1], 0, -8), "B": (Bh[0], Bh[1], 0, 16), "C": P_(Cc, 10, -4), "P": (cx, cy - R, 0, -8), "Q": (cx, cy + R, 0, 16)},
+        [("A", "B")], dashed=[("O", "A"), ("O", "B"), ("O", "C"), ("O", "P"), ("O", "Q")],
+        extra=circ(cx, cy, R) + f"<line x1='30' y1='{cy - R}' x2='320' y2='{cy - R}' stroke='#1d3a8a' stroke-width='2'/><line x1='30' y1='{cy + R}' x2='320' y2='{cy + R}' stroke='#1d3a8a' stroke-width='2'/>",
+        labels=[(36, cy - R - 6, "X"), (316, cy - R - 6, "Y"), (36, cy + R - 6, "X′"), (316, cy + R - 6, "Y′")], caption="XY ∥ X′Y′; AB, C पर स्पर्श रेखा")
+s = f + gp("XY और X′Y′ समांतर स्पर्श रेखाएँ (स्पर्श बिंदु P, Q); C पर स्पर्श रेखा AB, XY को A पर और X′Y′ को B पर काटती है", "∠AOB = 90°")
+s += pf(("ΔOPA और ΔOCA में: OP = OC (त्रिज्याएँ), AP = AC (बाह्य बिंदु A से स्पर्श रेखाएँ), OA उभयनिष्ठ", ""),
+        ("ΔOPA ≅ ΔOCA, अतः ∠PAO = ∠CAO, अर्थात् ∠OAB = ½∠PAB …(1)", "SSS, सर्वांगसम त्रिभुजों के संगत भाग"),
+        ("इसी प्रकार ΔOQB ≅ ΔOCB, अतः ∠OBA = ½∠QBA …(2)", ""),
+        ("XY ∥ X′Y′ और AB तिर्यक रेखा है, इसलिए ∠PAB + ∠QBA = 180° …(3)", "तिर्यक रेखा के एक ही ओर के अंतः कोण"),
+        ("(1), (2), (3) से ∠OAB + ∠OBA = ½ × 180° = 90°", ""),
+        ("ΔAOB में ∠AOB = 180° − (∠OAB + ∠OBA) = 180° − 90° = 90°", "त्रिभुज के कोणों का योग 180°"))
+EX2.append(("आकृति में XY तथा X′Y′, O केंद्र वाले किसी वृत्त पर दो समांतर स्पर्श रेखाएँ हैं और स्पर्श बिंदु C पर स्पर्श रेखा AB, XY को A तथा X′Y′ को B पर प्रतिच्छेद करती है। सिद्ध कीजिए कि ∠AOB = 90° है।", s + ok("इति सिद्धम्")))
+
+# Q10
+cx, cy, R = 100, 100, 60
+c1, c2 = tangents(cx, cy, R, 300, cy)
+f = fig(340, 200, {"O": (cx, cy, -12, 4), "A": P_(c1), "B": P_(c2, 0, 16), "P": (300, cy, 10, 4)}, [("O", "A"), ("O", "B"), ("P", "A"), ("P", "B")],
+        extra=circ(cx, cy, R), caption="PA और PB स्पर्श रेखाएँ")
+s = f + gp("केंद्र O वाले वृत्त पर बाह्य बिंदु P से स्पर्श रेखाएँ PA और PB", "∠APB + ∠AOB = 180°") + TT
+s += pf(("OA ⊥ PA और OB ⊥ PB, इसलिए ∠OAP = ∠OBP = 90°", "प्रमेय 10.1"),
+        ("चतुर्भुज OAPB में ∠OAP + ∠APB + ∠OBP + ∠AOB = 360°", "चतुर्भुज के कोणों का योग"),
+        ("90° + ∠APB + 90° + ∠AOB = 360°", ""), ("∠APB + ∠AOB = 180°", ""),
+        ("अतः स्पर्श रेखाओं के बीच का कोण, स्पर्श बिंदुओं को मिलाने वाले रेखाखंड द्वारा केंद्र पर अंतरित कोण का संपूरक है", ""))
+EX2.append(("सिद्ध कीजिए कि किसी बाह्य बिंदु से किसी वृत्त पर खींची गई स्पर्श रेखाओं के बीच का कोण, स्पर्श बिंदुओं को मिलाने वाले रेखाखंड द्वारा केंद्र पर अंतरित कोण का संपूरक है।", s + ok("इति सिद्धम्")))
+
+# Q11
+pts11 = tanpoly(170, 105, 55, [90, 210, 270, 30], ["A", "D", "C", "B"])
+f = fig(340, 210, pts11, [("A", "B"), ("B", "C"), ("C", "D"), ("D", "A")], extra=circ(170, 105, 55), caption="समांतर चतुर्भुज ABCD वृत्त के परिगत")
+s = f + gp("समांतर चतुर्भुज ABCD एक वृत्त के परिगत है", "ABCD एक समचतुर्भुज है") + T2
+s += pf(("प्र.8 की भाँति, परिगत चतुर्भुज में AB + CD = AD + BC …(1)", "बाह्य बिंदुओं से स्पर्श रेखाएँ बराबर"),
+        ("समांतर चतुर्भुज में AB = CD और AD = BC …(2)", "सम्मुख भुजाएँ बराबर"),
+        ("(1) और (2) से 2AB = 2BC, अर्थात् AB = BC", ""), ("अतः AB = BC = CD = DA", ""),
+        ("चारों भुजाएँ बराबर हैं, इसलिए ABCD समचतुर्भुज है", ""))
+EX2.append(("सिद्ध कीजिए कि किसी वृत्त के परिगत बना समांतर चतुर्भुज समचतुर्भुज होता है।", s + ok("इति सिद्धम्")))
+
+# Q12
+x = 7
+a, b, c = 13, 15, 14
+sh = (a + b + c) / 2
+close(math.sqrt(sh * (sh - a) * (sh - b) * (sh - c)), 4 * sh)
+k, ox, oy = 15, 65, 195
+T12 = lambda X, Y: (ox + k * X, oy - k * Y)
+pts12 = {"A": (*T12(9, 12), 0, -8), "B": (*T12(0, 0), -10, 14), "C": (*T12(14, 0), 10, 14), "D": (*T12(8, 0), 0, 16), "O": (*T12(8, 4), 10, -4)}
+f = fig(340, 215, pts12, [("A", "B"), ("B", "C"), ("C", "A")], dashed=[("O", "D")], extra=circ(*T12(8, 4), 4 * k),
+        labels=[(ox + k * 4, 212, "8 cm"), (ox + k * 11, 212, "6 cm"), (ox + k * 8 + 8, oy - k * 2, "4")], caption="BD = 8 cm, DC = 6 cm, r = 4 cm")
+s = f + p("मान लीजिए अंतःवृत्त AB को F और AC को E पर छूता है तथा AF = AE = x cm।") + T2
+s += p("बाह्य बिंदुओं से स्पर्श रेखाएँ बराबर होती हैं:") + eqs(("BF", "BD=8\\ \\text{cm}"), ("CE", "CD=6\\ \\text{cm}"))
+s += p("इसलिए भुजाएँ:") + eqs(("AB", "x+8"), ("AC", "x+6"), ("BC", "14"))
+s += lines("s", "\\dfrac{(x+8)+(x+6)+14}{2}", "x+14")
+s += formula("क्षेत्रफल", "", [m("\\Delta=r\\times s") + " (अंतःत्रिज्या × अर्धपरिमाप)", m("\\Delta=\\sqrt{s(s-a)(s-b)(s-c)}") + " (हीरोन)"])
+s += p("(1) से:") + lines("\\Delta", "4(x+14)")
+s += p("(2) से:") + lines("\\Delta", "\\sqrt{(x+14)\\cdot x\\cdot 6\\cdot 8}", "\\sqrt{48x(x+14)}")
+s += p("दोनों को बराबर रखकर वर्ग करने पर:") + eqs(("16(x+14)^2", "48x(x+14)"), ("16(x+14)", "48x"), ("x+14", "3x"), ("2x", "14"), ("x", "7"))
+s += eqs(("AB", "7+8=15\\ \\text{cm}"), ("AC", "7+6=13\\ \\text{cm}"))
+s += "<div class='vt'>जाँच:</div>" + p(m("s=21,\\ \\sqrt{21\\cdot7\\cdot6\\cdot8}=\\sqrt{7056}=84=4\\times21") + " ✔")
+s += ans("AB = 15 cm, AC = 13 cm")
+EX2.append(("4 cm त्रिज्या वाले एक वृत्त के परिगत एक त्रिभुज ABC इस प्रकार खींचा गया है कि रेखाखंड BD और DC (जिनमें स्पर्श बिंदु D द्वारा BC विभाजित है) की लंबाइयाँ क्रमशः 8 cm और 6 cm हैं। भुजाएँ AB और AC ज्ञात कीजिए।", s))
+
+# Q13
+pts13 = tanpoly(170, 105, 60, [90, 195, 262, 340], ["A", "D", "C", "B"], ["P", "S", "R", "Q"])
+pts13["O"] = (170, 105, 12, 4)
+f = fig(340, 210, pts13, [("A", "B"), ("B", "C"), ("C", "D"), ("D", "A")], dashed=[("O", "A"), ("O", "B"), ("O", "C"), ("O", "D")],
+        extra=circ(170, 105, 60), caption="P, Q, R, S स्पर्श बिंदु")
+s = f + gp("चतुर्भुज ABCD केंद्र O वाले वृत्त के परिगत है; स्पर्श बिंदु P, Q, R, S", "∠AOB + ∠COD = 180° और ∠AOD + ∠BOC = 180°")
+s += pf(("OP, OQ, OR, OS को मिलाइए। ΔOAP ≅ ΔOAS (OP = OS, AP = AS, OA उभयनिष्ठ), अतः ∠AOP = ∠AOS = ∠1 (मान लीजिए)", "SSS"),
+        ("इसी प्रकार ∠BOP = ∠BOQ = ∠2, ∠COQ = ∠COR = ∠3, ∠DOR = ∠DOS = ∠4", ""),
+        ("केंद्र O पर सभी कोणों का योग: 2(∠1 + ∠2 + ∠3 + ∠4) = 360°, अर्थात् ∠1 + ∠2 + ∠3 + ∠4 = 180° …(1)", "एक बिंदु पर कोणों का योग 360°"),
+        ("∠AOB = ∠1 + ∠2 और ∠COD = ∠3 + ∠4", ""),
+        ("(1) से ∠AOB + ∠COD = 180°", ""),
+        ("इसी प्रकार ∠AOD + ∠BOC = (∠1 + ∠4) + (∠2 + ∠3) = 180°", ""))
+EX2.append(("सिद्ध कीजिए कि वृत्त के परिगत बनी चतुर्भुज की आमने-सामने की भुजाएँ केंद्र पर संपूरक कोण अंतरित करती हैं।", s + ok("इति सिद्धम्")))
+
+EX1 = [(qt(t_), b_) for t_, b_ in EX1]
+EX2 = [(qt(t_), b_) for t_, b_ in EX2]
+page(BASE, 10, CH, "exercise-10-1", "प्रश्नावली 10.1", "कक्षा 10 गणित · अध्याय 10: वृत्त · 4 प्रश्न (स्पर्श रेखा)", EX1,
+     (BASE, "अध्याय 10"), (BASE + "exercise-10-2/", "प्रश्नावली 10.2"))
+page(BASE, 10, CH, "exercise-10-2", "प्रश्नावली 10.2", "कक्षा 10 गणित · अध्याय 10: वृत्त · 13 प्रश्न (बाह्य बिंदु से स्पर्श रेखाएँ)", EX2,
+     (BASE + "exercise-10-1/", "प्रश्नावली 10.1"), ("/hi/class-10/maths/", "सभी अध्याय"))
+print("ok")
