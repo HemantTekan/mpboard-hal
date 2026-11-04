@@ -453,7 +453,41 @@
         "hi": "त्रिभुज",
         "en": "Triangles"
        },
-       "items": []
+       "items": [
+        {
+         "slug": "exercise-6-1",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 6.1",
+          "en": "Exercise 6.1"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-06/exercise-6-1/"
+         }
+        },
+        {
+         "slug": "exercise-6-2",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 6.2",
+          "en": "Exercise 6.2"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-06/exercise-6-2/"
+         }
+        },
+        {
+         "slug": "exercise-6-3",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 6.3",
+          "en": "Exercise 6.3"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-06/exercise-6-3/"
+         }
+        }
+       ]
       },
       {
        "num": 7,
