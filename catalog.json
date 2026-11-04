@@ -400,7 +400,52 @@
         "hi": "समांतर श्रेढ़ियाँ",
         "en": "Arithmetic Progressions"
        },
-       "items": []
+       "items": [
+        {
+         "slug": "exercise-5-1",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 5.1",
+          "en": "Exercise 5.1"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-05/exercise-5-1/"
+         }
+        },
+        {
+         "slug": "exercise-5-2",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 5.2",
+          "en": "Exercise 5.2"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-05/exercise-5-2/"
+         }
+        },
+        {
+         "slug": "exercise-5-3",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 5.3",
+          "en": "Exercise 5.3"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-05/exercise-5-3/"
+         }
+        },
+        {
+         "slug": "exercise-5-4",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 5.4 (ऐच्छिक)",
+          "en": "Exercise 5.4 (Optional)"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-05/exercise-5-4/"
+         }
+        }
+       ]
       },
       {
        "num": 6,
