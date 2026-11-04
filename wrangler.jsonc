@@ -1,0 +1,30 @@
+// educationdew.com Worker config: single source of truth, read by tools/deploy_worker.py (and wrangler-compatible).
+// Static site = site/ (served by assets layer). Only /api/* runs worker code.
+// New storage later: add an "r2_buckets": [{"binding": "FILES", "bucket_name": "educationdew-files"}] block; nothing else changes.
+{
+  "name": "educationdew",
+  "account_id": "1f56a0aa6f2d247a2e9c0c1cfc73c2e7",
+  "main": "worker/src/index.js",
+  "compatibility_date": "2026-11-04",
+  "workers_dev": true,
+  "preview_urls": false,
+  "routes": [
+    { "pattern": "educationdew.com", "custom_domain": true },
+    { "pattern": "www.educationdew.com", "custom_domain": true }
+  ],
+  "assets": {
+    "directory": "site",
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "educationdew-db",
+      "database_id": "19085f4b-338c-48e2-af5e-67a95c36ac83",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

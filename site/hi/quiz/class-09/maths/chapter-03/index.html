@@ -764,6 +764,13 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
       .x-review__q { font: var(--type-body-strong); }
       .x-review__a { font: var(--type-small); color: var(--text-secondary); }
       .x-review__a b { font-weight: var(--weight-medium); color: var(--text-primary); }
+      .ed-board { padding: 16px 18px; border-radius: var(--r-m); background: var(--fill-tertiary); }
+      .ed-board__title { font-weight: 600; margin: 0 0 10px; }
+      .ed-board__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+      .ed-board__list li { display: grid; grid-template-columns: 2.2em 1fr auto; align-items: center; gap: 8px; padding: 6px 8px; border-radius: var(--r-s); }
+      .ed-board__list li.is-me { background: color-mix(in srgb, #16a34a 16%, transparent); font-weight: 600; }
+      .ed-board__rank { text-align: center; }
+      .ed-board__score { font-variant-numeric: tabular-nums; }
       .x-hint { font: var(--type-small); color: var(--text-secondary); text-align: center; padding: 12px; border: 1.5px dashed var(--stroke-primary); border-radius: var(--r-s); }
       .x-steps { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: var(--size-prose); }
     </style>
@@ -789,8 +796,9 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
                 <li>उत्तर चुनते ही सही/गलत और कारण दिखेगा।</li>
               </ul>
               <label class="x-field" for="name">अपना नाम लिखें
-                <input id="name" type="text" autocomplete="name" placeholder="जैसे: अंजलि" />
+                <input id="name" type="text" autocomplete="nickname" maxlength="24" placeholder="जैसे: अंजलि" />
               </label>
+              <p class="x-note" style="font-size:13px;opacity:.75;margin:-6px 0 0">नाम टॉपर सूची में दिखेगा। केवल पहला नाम या उपनाम लिखें, फ़ोन नंबर नहीं।</p>
               <button class="x-go" id="start" type="button">क्विज़ शुरू करें</button>
             </div>
 
@@ -823,6 +831,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
                   </section>
                   <p class="x-msg" id="r-msg"></p>
                 </div>
+                <div class="ed-board" id="r-board" hidden></div>
                 <p class="x-hint">📸 परिणाम का स्क्रीनशॉट लेकर शिक्षक को भेजें</p>
                 <button class="x-go" id="again" type="button">फिर से खेलें</button>
                 <div class="head"><h2>उत्तरों की समीक्षा</h2></div>
@@ -1076,9 +1085,9 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           state.name = $("name").value.trim();
           state.order = shuffle(QUESTIONS.map(function (q) {
             var idx = shuffle([0, 1, 2, 3]);
-            return { q: q.q, e: q.e, pts: q.pts, o: idx.map(function (k) { return q.o[k]; }), a: idx.indexOf(q.a) };
+            return { qi: QUESTIONS.indexOf(q), q: q.q, e: q.e, pts: q.pts, o: idx.map(function (k) { return q.o[k]; }), a: idx.indexOf(q.a) };
           }));
-          state.i = 0; state.score = 0; state.answers = [];
+          state.i = 0; state.score = 0; state.answers = []; state.t0 = Date.now();
           show("screen-q");
           render();
         }
@@ -1111,7 +1120,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           var q = state.order[state.i];
           var ok = k === q.a;
           if (ok) state.score++;
-          state.answers.push({ q: q.q, pick: q.o[k], right: q.o[q.a], ok: ok });
+          state.answers.push({ qi: q.qi, q: q.q, pick: q.o[k], right: q.o[q.a], ok: ok });
           var btns = $("q-opts").children;
           for (var j = 0; j < btns.length; j++) {
             btns[j].disabled = true;
@@ -1154,6 +1163,12 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
               "</li>";
           }).join("");
           show("screen-result");
+          if (window.EDQuiz) {
+            var QID = "hi/class-09/maths/chapter-03";
+            EDQuiz.submit({ quiz: QID, name: state.name, score: s, total: n, seconds: Math.round((Date.now() - state.t0) / 1000),
+              wrong: state.answers.filter(function (a) { return !a.ok; }).map(function (a) { return a.qi; }) })
+              .then(function () { EDQuiz.board(QID, $("r-board"), state.name); });
+          }
         }
 
         $("start").addEventListener("click", start);
@@ -1163,5 +1178,6 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
         $("again2").addEventListener("click", start);
       })();
     </script>
-  </body>
+  <script src="/assets/quiz-api.js" defer></script>
+</body>
 </html>
