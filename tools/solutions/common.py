@@ -86,7 +86,7 @@ def given(k, f):
             f"<div class='box f'><b>ज्ञात करना है</b><div>{f}</div></div></div>")
 
 
-_LAB = re.compile(r"(?<![\\\w])\((i|ii|iii|iv|v|vi|vii|viii|ix)\)\s")
+_LAB = re.compile(r"(?<![\\\w])\((i|ii|iii|iv|v|vi|vii|viii|ix|x)\)\s")
 
 
 def ans(t):

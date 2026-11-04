@@ -526,7 +526,41 @@
         "hi": "त्रिकोणमिति का परिचय",
         "en": "Introduction to Trigonometry"
        },
-       "items": []
+       "items": [
+        {
+         "slug": "exercise-8-1",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 8.1",
+          "en": "Exercise 8.1"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-08/exercise-8-1/"
+         }
+        },
+        {
+         "slug": "exercise-8-2",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 8.2",
+          "en": "Exercise 8.2"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-08/exercise-8-2/"
+         }
+        },
+        {
+         "slug": "exercise-8-3",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 8.3",
+          "en": "Exercise 8.3"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-08/exercise-8-3/"
+         }
+        }
+       ]
       },
       {
        "num": 9,
