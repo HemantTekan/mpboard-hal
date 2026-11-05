@@ -5,7 +5,7 @@
 - Database: D1 `educationdew-db`, binding `DB`. Schema change = new file `migrations/000N_name.sql` (never edit an applied one). Deploy applies new ones automatically (tracked in `d1_migrations`).
 - New API feature: add `worker/src/routes/<feature>.js` and one line in `ROUTES`.
 - Files later (R2): add `r2_buckets` to `wrangler.jsonc`; the deploy script binds it.
-- Deploy: `pip install blake3 cairosvg && python3 tools/deploy_worker.py site`.
+- Deploy: `pip install blake3 cairosvg && python3 tools/make.py deploy` (builds, checks, then uploads site/ and this Worker).
 
 ## API
 - `GET /api/health`

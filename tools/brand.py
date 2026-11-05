@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
-"""Apply the educationdew brand header, colourful navigation and home hero to every page in site/.
-Idempotent; run after build/generators (deploy runs it automatically)."""
+"""Brand pass: educationdew header (logo, wordmark, language switch, colourful nav), home hero on /, /hi/, /en/,
+brand.css and favicon links. Idempotent. Part of the build: tools/make.py runs it after the generators.
+
+  python3 tools/brand.py [site]      (standalone; normally use tools/make.py)
+
+As a module: brand_html(text, rel) -> new text or None (no <header class="top">); run(site) -> pages branded.
+"""
 import re, sys, pathlib
 
-SITE = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else pathlib.Path(__file__).resolve().parents[1] / "site")
+DEFAULT_SITE = pathlib.Path(__file__).resolve().parents[1] / "site"
 L = {
     "hi": dict(name="MP Board हल", home="होम", c10="कक्षा 10", c9="कक्षा 9", notes="नोट्स", quiz="क्विज़", papers="प्रश्नपत्र", pdfs="PDF",
                tag="MP Board, NCERT और CBSE गणित के चरणबद्ध हल, चित्र और आलेख सहित — आसान हिंदी में।",
@@ -62,15 +67,21 @@ def hero(lang, root=False):
             f'</div></div></section><!--/hero-->')
 
 
-def process(f):
-    s = f.read_text(encoding="utf-8")
+def page_rel(rel):
+    """site-relative file path ("hi/class-10/index.html") -> directory URL ("/hi/class-10/")."""
+    d = str(pathlib.PurePosixPath(rel).parent)
+    r = "/" + d.replace(".", "").strip("/") + "/"
+    return "/" if r == "//" else r
+
+
+def brand_html(s, rel):
+    """Pure transform of one page. rel = path relative to site/ (posix). Returns None if the page has no top header."""
     m = HEAD_RE.search(s)
     if not m:
-        return False
+        return None
     lang_m = re.search(r'<html lang="(\w+)"', s)
     lang = lang_m.group(1) if lang_m and lang_m.group(1) in L else "hi"
-    rel = "/" + str(f.relative_to(SITE).parent).replace(".", "").strip("/") + "/"
-    rel = "/" if rel == "//" else rel
+    rel = page_rel(rel)
     old = m.group(0)
     sw = other_url(old, lang, rel) if 'class="bar"' not in old else re.findall(r'href="([^"]+)" hreflang', old)[1 if lang == "hi" else 0]
     s = s.replace(old, header(lang, rel, sw), 1)
@@ -81,10 +92,22 @@ def process(f):
     if "/assets/brand.css" not in s:
         s = s.replace("</head>", '<link rel="stylesheet" href="/assets/brand.css"></head>', 1)
     s = s.replace("</head>", ICONS + "</head>", 1)
-    f.write_text(s, encoding="utf-8")
-    return True
+    return s
+
+
+def run(site=DEFAULT_SITE):
+    site = pathlib.Path(site)
+    n = 0
+    for f in sorted(site.rglob("*.html")):
+        s = f.read_text(encoding="utf-8")
+        out = brand_html(s, f.relative_to(site).as_posix())
+        if out is None:
+            continue
+        n += 1
+        if out != s:
+            f.write_text(out, encoding="utf-8")
+    return n
 
 
 if __name__ == "__main__":
-    n = sum(process(f) for f in SITE.rglob("*.html"))
-    print("branded", n)
+    print("branded", run(sys.argv[1] if len(sys.argv) > 1 else DEFAULT_SITE))

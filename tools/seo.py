@@ -1,9 +1,25 @@
 #!/usr/bin/env python3
-"""SEO pass over the built site: canonical, Open Graph, JSON-LD, robots meta,
-sitemap.xml and robots.txt. Idempotent: replaces its own block on every run.
-Usage: python3 tools/seo.py site
+"""SEO pass over the built site: canonical, Open Graph, JSON-LD, robots meta, footer links,
+sitemap.xml and robots.txt. Idempotent: replaces its own <!--seo--> block on every run.
+Part of the build: tools/make.py runs it after brand.py.
+
+  python3 tools/seo.py [site]        (standalone; normally use tools/make.py)
+
+As a module: page_seo(text, rel, lastmod) -> (text, sitemap entry or None); run(site) -> indexable pages.
+
+Dates (JSON-LD dateModified and sitemap <lastmod>) come from git, but only from commits that changed what the
+page renders to: each committed version of site/<rel> is normalised (brand + this SEO pass with a fixed date)
+and compared with the page being built.
+  - page differs from the committed HEAD version (or is new/untracked) -> today's date (UTC)
+  - otherwise -> UTC date of the oldest commit since which the rendered page has been unchanged
+So a commit that only regenerates or re-post-processes pages (same rendered output) never moves a date, and
+the date written before committing a real change equals the date after committing it (if committed the same
+UTC day). SOURCE_DATE_EPOCH overrides "today". Without git, every page gets today.
 """
-import html, json, pathlib, re, subprocess, sys, datetime
+import datetime, html, json, os, pathlib, re, subprocess, sys
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import brand
 
 BASE = "https://educationdew.com"
 SITE_NAME = "MP Board हल"
@@ -11,27 +27,14 @@ AUTHOR = "educationdew.com"
 AUTHOR_DESC = "MP Board, NCERT और CBSE कक्षा 9–10 गणित के चरणबद्ध हल"
 START, END = "<!--seo-->", "<!--/seo-->"
 
-root = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "site")
-repo = root.resolve().parent
-
-
-def lastmod(p):
-    try:
-        out = subprocess.run(["git", "-C", str(repo), "log", "-1", "--format=%cs", "--", str(p.resolve())],
-                             capture_output=True, text=True).stdout.strip()
-        if out:
-            return out
-    except Exception:
-        pass
-    return datetime.date.today().isoformat()
+DEFAULT_SITE = pathlib.Path(__file__).resolve().parents[1] / "site"
 
 
 def text_of(s):
     return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", s))).strip()
 
 
-def url_for(p):
-    rel = p.relative_to(root).as_posix()
+def url_for(rel):
     if rel == "index.html":
         return BASE + "/"
     if rel.endswith("/index.html"):
@@ -39,12 +42,11 @@ def url_for(p):
     return BASE + "/" + rel
 
 
-entries = []
-for p in sorted(root.rglob("*.html")):
-    s = p.read_text(encoding="utf-8")
+def page_seo(s, rel, lastmod):
+    """Pure transform of one page. rel = path relative to site/ (posix); lastmod() -> "YYYY-MM-DD", called only
+    for indexable pages. Returns (new text, (url, lastmod) for the sitemap or None)."""
     s = re.sub(re.escape(START) + r".*?" + re.escape(END), "", s, flags=re.S)
-    rel = p.relative_to(root).as_posix()
-    url = url_for(p)
+    url = url_for(rel)
     title_m = re.search(r"<title>(.*?)</title>", s, re.S)
     title = text_of(title_m.group(1)) if title_m else SITE_NAME
     desc_m = re.search(r'<meta name="description" content="([^"]*)"', s)
@@ -53,6 +55,7 @@ for p in sorted(root.rglob("*.html")):
     main_txt = text_of(re.sub(r'<p class="boards".*?</p>', "", main_m.group(0), flags=re.S)) if main_m else ""
 
     # thin / placeholder pages: keep out of the index until real content exists
+    entry = None
     thin = (rel == "404.html" or rel.startswith("en/") or rel.startswith("teacher/")
             or ("जल्द आ रहे हैं" in main_txt and len(main_txt) < 300))
 
@@ -105,7 +108,7 @@ for p in sorted(root.rglob("*.html")):
                 "author": {"@type": "Organization", "name": AUTHOR, "url": BASE + "/"},
                 "keywords": "MP Board, MPBSE, NCERT, CBSE, गणित, हल",
                 "publisher": {"@type": "Organization", "name": SITE_NAME, "url": BASE + "/", "logo": {"@type": "ImageObject", "url": BASE + "/assets/icon-512.png"}},
-                "dateModified": lastmod(p),
+                "dateModified": lastmod(),
             }
             ld.append(lr)
         if rel in ("index.html", "hi/index.html"):
@@ -116,7 +119,7 @@ for p in sorted(root.rglob("*.html")):
                        "inLanguage": "hi", "description": AUTHOR_DESC, "author": {"@type": "Organization", "name": AUTHOR, "url": BASE + "/"}})
         for obj in ld:
             head.append('<script type="application/ld+json">' + json.dumps(obj, ensure_ascii=False) + "</script>")
-        entries.append((url, lastmod(p)))
+        entry = (url, lastmod())
 
     block = START + "".join(head) + END
     s = s.replace("</title>", "</title>" + block, 1) if "</title>" in s else s.replace("</head>", block + "</head>", 1)
@@ -127,12 +130,80 @@ for p in sorted(root.rglob("*.html")):
              '<a href="/hi/contact/">संपर्क</a> · <a href="/hi/privacy/">गोपनीयता नीति</a> · <a href="/hi/disclaimer/">अस्वीकरण</a> · '
              '<a href="/hi/terms/">उपयोग की शर्तें</a></nav><!--/foot-->')
     s = re.sub(r"(<footer[^>]*>)", lambda m: m.group(1) + links, s, count=1)
-    p.write_text(s, encoding="utf-8")
+    return s, entry
 
-sm = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
-for u, d in entries:
-    sm.append(f"<url><loc>{u}</loc><lastmod>{d}</lastmod></url>")
-sm.append("</urlset>")
-(root / "sitemap.xml").write_text("\n".join(sm) + "\n", encoding="utf-8")
-(root / "robots.txt").write_text(f"User-agent: *\nAllow: /\nDisallow: /teacher/\nDisallow: /api/\n\nSitemap: {BASE}/sitemap.xml\n", encoding="utf-8")
-print(f"seo: {len(entries)} indexable pages in sitemap")
+
+def today():
+    epoch = os.environ.get("SOURCE_DATE_EPOCH")
+    t = datetime.datetime.fromtimestamp(int(epoch), datetime.timezone.utc) if epoch else datetime.datetime.now(datetime.timezone.utc)
+    return t.date().isoformat()
+
+
+def rendered(s, rel):
+    """What a version of a page renders to after the post-processing passes, independent of dates."""
+    b = brand.brand_html(s, rel)
+    return page_seo(b if b is not None else s, rel, lambda: "0000-00-00")[0]
+
+
+class GitDates:
+    def __init__(self, site):
+        self.site = pathlib.Path(site).resolve()
+        self.repo = None
+        r = subprocess.run(["git", "-C", str(self.site), "rev-parse", "--show-toplevel"], capture_output=True, text=True)
+        if r.returncode == 0:
+            self.repo = pathlib.Path(r.stdout.strip())
+        self.cache = {}
+
+    def _git(self, *args):
+        r = subprocess.run(["git", "-C", str(self.repo), *args], capture_output=True)
+        return r.stdout if r.returncode == 0 else None
+
+    def lastmod(self, rel, current):
+        if rel not in self.cache:
+            self.cache[rel] = self._lastmod(rel, current)
+        return self.cache[rel]
+
+    def _lastmod(self, rel, current):
+        """current = the page as it will be published (already branded); see module docstring."""
+        if self.repo is None:
+            return today()
+        path = (self.site / rel).relative_to(self.repo).as_posix()
+        log = (self._git("log", "--format=%H %ct", "--", path) or b"").decode().split()
+        commits = list(zip(log[0::2], log[1::2]))  # newest first
+        cur = rendered(current, rel)
+        when = None
+        for sha, ct in commits:
+            old = self._git("show", f"{sha}:{path}")
+            if old is None:
+                break  # file deleted in this commit
+            if rendered(old.decode("utf-8"), rel) != cur:
+                break
+            when = ct
+        if when is None:
+            return today()
+        return datetime.datetime.fromtimestamp(int(when), datetime.timezone.utc).date().isoformat()
+
+
+def run(site=DEFAULT_SITE):
+    site = pathlib.Path(site)
+    dates = GitDates(site)
+    entries = []
+    for p in sorted(site.rglob("*.html")):
+        rel = p.relative_to(site).as_posix()
+        s = p.read_text(encoding="utf-8")
+        out, entry = page_seo(s, rel, lambda: dates.lastmod(rel, s))
+        if entry:
+            entries.append(entry)
+        if out != s:
+            p.write_text(out, encoding="utf-8")
+    sm = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    for u, d in entries:
+        sm.append(f"<url><loc>{u}</loc><lastmod>{d}</lastmod></url>")
+    sm.append("</urlset>")
+    (site / "sitemap.xml").write_text("\n".join(sm) + "\n", encoding="utf-8")
+    (site / "robots.txt").write_text(f"User-agent: *\nAllow: /\nDisallow: /teacher/\nDisallow: /api/\n\nSitemap: {BASE}/sitemap.xml\n", encoding="utf-8")
+    return len(entries)
+
+
+if __name__ == "__main__":
+    print(f"seo: {run(sys.argv[1] if len(sys.argv) > 1 else DEFAULT_SITE)} indexable pages in sitemap")

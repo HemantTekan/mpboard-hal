@@ -10,7 +10,7 @@ NCERT and MP Board textbook solutions, Class 1 to 12, Hindi and English medium. 
 catalog.json              every class, subject, chapter and item (notes / exercise / quiz), papers and PDFs,
                           with Hindi and English titles
 site/                     the published website (generated pages + hand-made content, committed)
-tools/make.py             one command: regenerates menus and all solution pages into site/
+tools/make.py             the pipeline: build (generators -> brand -> seo -> check) and deploy
 tools/build.py            menu, chapter, item, PDF and info pages from catalog.json
 tools/solutions/
   common.py               page template, CSS, KaTeX pre-rendering, shared helpers
@@ -20,9 +20,10 @@ tools/solutions/
   class10_chN.py          one file per chapter: only its questions, answers and chapter-specific figures
 tools/katex_render.js     server-side KaTeX (node + tools/vendor/katex.min.js); pages ship no maths JS
 tools/check.py            link / KaTeX / <title> checks over site/
-tools/brand.py, seo.py    post-processing applied at deploy time (brand header, canonical, JSON-LD,
-                          sitemap.xml, robots.txt); both idempotent
-tools/deploy_cloudflare.py  deploy command (runs tools/deploy_worker.py)
+tools/brand.py, seo.py    build passes run by make.py after the generators (brand header, nav, hero, icons;
+                          canonical, OG, JSON-LD, sitemap.xml, robots.txt); idempotent, importable
+tools/deploy_worker.py    upload step only (D1 migrations, assets, Worker code); never modifies site/
+tools/deploy_cloudflare.py  alias for `make.py deploy`
 worker/, migrations/, wrangler.jsonc   Cloudflare Worker API + D1 database (quiz scores); see worker/README.md
 ```
 
@@ -31,14 +32,19 @@ URL pattern: `/hi/class-10/maths/chapter-04/exercise-4-1/` and `/en/...` (same p
 ## Build
 
 ```
-python3 tools/make.py                  # menus + all solution pages
-python3 tools/make.py menus            # only pages from catalog.json
-python3 tools/make.py solutions 12     # only chapter 12 solutions
+python3 tools/make.py                  # everything: menus + all solutions -> brand -> seo -> check
+python3 tools/make.py menus            # only pages from catalog.json, then brand -> seo -> check
+python3 tools/make.py solutions 12     # only chapter 12 solutions, then brand -> seo -> check
 ```
 
-Needs Python 3 and `node` (for KaTeX). Output is deterministic; review `git diff site/` before committing.
-A deploy runs `brand.py` + `seo.py` on `site/` in place, so pages committed after a deploy can carry that post-processing;
-regenerating rewrites them without it, which is expected (the next deploy applies it again).
+Needs Python 3, `git` and `node` (for KaTeX). Every run leaves `site/` in its final form, exactly what a deploy
+uploads, and running it twice changes nothing. Review `git diff site/` and commit `site/` with the source change,
+so the repository always holds what is live.
+
+Dates (JSON-LD `dateModified`, sitemap `<lastmod>`) come from git history in `seo.py`: a page's date is the UTC
+day of the commit since which its rendered output is unchanged; a page that differs from the last commit gets
+today's UTC date (`SOURCE_DATE_EPOCH` overrides "today"). Commits that only regenerate pages without changing
+their rendered output do not move dates.
 
 ## Check
 
@@ -77,7 +83,7 @@ Reports broken internal links (href/src to local paths that do not exist, includ
     "title": {"hi": "प्रश्नावली N.1", "en": "Exercise N.1"},
     "hi": {"href": "/hi/class-10/maths/chapter-NN/exercise-N-1/"}}
    ```
-3. `python3 tools/make.py && python3 tools/check.py`, then review the pages locally (`python3 -m http.server -d site`).
+3. `python3 tools/make.py` (includes the checks), then review the pages locally (`python3 -m http.server -d site`).
 
 ## Add a PDF to the /hi/pdf/ section
 
@@ -89,15 +95,18 @@ Reports broken internal links (href/src to local paths that do not exist, includ
     "hi": {"pdf": "sutra-sarni.pdf", "summary": ["पहला बिंदु", "दूसरा बिंदु"]}}
    ```
 2. Put the file at `site/hi/pdf/<slug>/<hi.pdf>` (e.g. `site/hi/pdf/class-10-ch12-sutra-sarni/sutra-sarni.pdf`).
-3. `python3 tools/make.py menus && python3 tools/check.py`.
+3. `python3 tools/make.py menus` (includes the checks).
 
 ## Deploy
 
-Deploys `site/` to the Cloudflare Worker `educationdew` (static assets + API, D1 migrations), serving educationdew.com:
+One command: full build -> check (aborts on any problem) -> upload `site/` to the Cloudflare Worker `educationdew`
+(static assets + API, D1 migrations), serving educationdew.com:
 
 ```
 pip install --user blake3 cairosvg
-python3 tools/deploy_cloudflare.py site
+python3 tools/make.py deploy
 ```
 
-The deploy step applies `brand.py` and `seo.py` to `site/` in place before uploading; building never uploads anything.
+The upload sends `site/` byte for byte and never modifies it. Commit the built `site/` (before or right after
+deploying; the command warns if it differs from the last commit). `python3 tools/deploy_cloudflare.py site` is
+an alias for the same command; `python3 tools/deploy_worker.py site` uploads without building.
