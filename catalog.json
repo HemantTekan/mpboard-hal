@@ -122,7 +122,41 @@
         "hi": "बहुपद",
         "en": "Polynomials"
        },
-       "items": []
+       "items": [
+        {
+         "slug": "exercise-2-1",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 2.1",
+          "en": "Exercise 2.1"
+         },
+         "hi": {
+          "href": "/hi/class-09/maths/chapter-02/exercise-2-1/"
+         }
+        },
+        {
+         "slug": "exercise-2-2",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 2.2",
+          "en": "Exercise 2.2"
+         },
+         "hi": {
+          "href": "/hi/class-09/maths/chapter-02/exercise-2-2/"
+         }
+        },
+        {
+         "slug": "exercise-2-3",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 2.3",
+          "en": "Exercise 2.3"
+         },
+         "hi": {
+          "href": "/hi/class-09/maths/chapter-02/exercise-2-3/"
+         }
+        }
+       ]
       },
       {
        "num": 3,
