@@ -155,6 +155,17 @@
          "hi": {
           "href": "/hi/class-09/maths/chapter-02/exercise-2-3/"
          }
+        },
+        {
+         "slug": "exercise-2-4",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 2.4",
+          "en": "Exercise 2.4"
+         },
+         "hi": {
+          "href": "/hi/class-09/maths/chapter-02/exercise-2-4/"
+         }
         }
        ]
       },

@@ -23,6 +23,7 @@ EXTRA_CSS = """
 .tp{background:#fff4ec;border-left:4px solid #e8711a;border-radius:8px;padding:5px 10px;margin:6px 0;font-size:.95em}
 .why{font-size:.95em;color:#36405a;margin:2px 0 6px}
 .ans .al{margin:10px 0}.eq{row-gap:9px}
+.eq .r,.eq .r .katex,.eq .r .katex-html{white-space:normal}.eq .r .base{margin:2px 0}.eq .r{min-width:0}.eq{grid-template-columns:auto auto minmax(0,1fr)}
 """
 
 
@@ -129,6 +130,8 @@ def pairs_table(a, b, c):
         e = abs(P) // d
         if d > e:
             break
+        if pick:
+            break
         cands = [(d, e), (-d, -e)] if P > 0 else [(d, -e), (-d, e)]
         for m_, n_ in cands:
             if (m_, n_) in seen:
@@ -137,6 +140,7 @@ def pairs_table(a, b, c):
             hl = m_ + n_ == b
             if hl and pick is None:
                 pick = (m_, n_)
+                break
             rows.append(f"<tr{' class=hl' if hl else ''}><td>{m_}, {n_}</td><td>{m_} × {'(' + str(n_) + ')' if n_ < 0 else n_} = {m_ * n_}</td><td>{m_} + ({n_}) = {m_ + n_}</td></tr>".replace("-", "−"))
     t = ("<div class='tw'><table class='st'><tr><th>संख्याएँ</th><th>गुणनफल</th><th>योग</th></tr>"
          + "".join(rows) + "</table></div>")
@@ -483,10 +487,467 @@ s += ans(" ".join(outs))
 E3.append((qt("गुणनखंड ज्ञात कीजिए: (i) " + m("x^3 - 2x^2 - x + 2") + " (ii) " + m("x^3 - 3x^2 - 9x - 5") + " (iii) " + m("x^3 + 13x^2 + 32x + 20") + " (iv) " + m("2y^3 + y^2 - 2y - 1")), s))
 assert len(E3) == 5
 
+# =====================================================================
+# Exercise 2.4 (बीजीय सर्वसमिकाएँ)
+# =====================================================================
+class Mo:
+    """Monomial: c (Fraction) × (√2)^s × variables."""
+    def __init__(self, c, v=None, s=0):
+        self.c, self.s, self.v = F(c), s, dict(v or {})
+
+    def __mul__(self, o):
+        if not isinstance(o, Mo):
+            o = Mo(o)
+        v = dict(self.v)
+        for k, e_ in o.v.items():
+            v[k] = v.get(k, 0) + e_
+        c, s = self.c * o.c, self.s + o.s
+        if s == 2:
+            c, s = c * 2, 0
+        return Mo(c, v, s)
+    __rmul__ = __mul__
+
+    def __neg__(self):
+        return Mo(-self.c, self.v, self.s)
+
+    def key(self):
+        return (tuple(sorted(self.v.items())), self.s)
+
+    def vt(self):
+        return "".join(k if e_ == 1 else f"{k}^{{{e_}}}" for k, e_ in sorted(self.v.items()))
+
+    def ct(self):
+        """signed coefficient alone"""
+        r = abs(self.c)
+        body = (num(r) if (r != 1 or not self.s) else "") + ("\\sqrt{2}" if self.s else "")
+        return ("-" if self.c < 0 else "") + body
+
+    def tex(self):
+        r = abs(self.c)
+        vt = self.vt()
+        if self.s:
+            body = ("" if r == 1 else num(r)) + "\\sqrt{2}" + vt
+        else:
+            body = ("" if (r == 1 and vt) else num(r)) + vt
+        return ("-" if self.c < 0 else "") + body
+
+
+def X(v, c=1, s=0):
+    return Mo(c, {v: 1}, s)
+
+
+def P(t):
+    """bracket a TeX piece when it starts with a minus"""
+    return f"\\left({t}\\right)" if (t.startswith("-") or "dfrac" in t) else t
+
+
+def B(m_):
+    return f"\\left({m_.tex()}\\right)"
+
+
+def sumt(ms):
+    out = ""
+    for m_ in ms:
+        t = m_.tex()
+        if not out:
+            out = t
+        else:
+            out += (" - " + t[1:]) if t.startswith("-") else (" + " + t)
+    return out
+
+
+def sq_rows(A):
+    R = A * A
+    rows = []
+    if A.vt() and (A.c != 1 or A.s):
+        rows.append(f"{P(A.ct())}^2 \\times ({A.vt()})^2")
+    elif not A.vt() and (A.c.denominator != 1 or A.s or A.c < 0):
+        rows.append(f"{P(A.ct())} \\times {P(A.ct())}")
+    rows.append(R.tex())
+    return lines(f"{B(A)}^2", *rows), R
+
+
+def cube_rows(A):
+    R = A * A * A
+    rows = []
+    if A.vt():
+        if A.c != 1 or A.s:
+            rows.append(f"{P(A.ct())}^3 \\times ({A.vt()})^3")
+            ct = P(A.ct())
+            rows.append(f"{ct} \\times {ct} \\times {ct} \\times {A.vt()}^{{3}}" if len(A.v) == 1 and list(A.v.values())[0] == 1 else rows[-1])
+            if rows[-1] == rows[-2]:
+                rows.pop()
+    else:
+        ct = P(A.ct())
+        if A.c != 1:
+            rows.append(f"{ct} \\times {ct} \\times {ct}")
+    rows.append(R.tex())
+    return lines(f"{B(A)}^3", *rows), R
+
+
+def prod_rows(k, Ms, head=None):
+    """k × M1 × M2 ... with the coefficients first, then the result."""
+    R = Mo(k)
+    for M_ in Ms:
+        R = R * M_
+    head = head or (f"{k}" + "".join(B(M_) for M_ in Ms))
+    cs = " \\times ".join([str(k)] + [P(M_.ct()) for M_ in Ms if M_.ct() not in ("1",)])
+    vs = " \\times ".join(M_.vt() for M_ in Ms if M_.vt())
+    rows = [cs + (f" \\times {vs}" if vs else "")]
+    rows.append(R.tex())
+    return lines(head, *rows), R
+
+
+def split_as(expr, Ms):
+    return lines(expr, " + ".join(B(M_) for M_ in Ms))
+
+
+SQ3 = formula("सर्वसमिका IV", m("(a + b + c)^2 = a^2 + b^2 + c^2 + 2ab + 2bc + 2ca"))
+
+
+def sq3(expr, A, B_, C):
+    h = SQ3
+    h += split_as(expr, [A, B_, C])
+    h += eqs(("a", A.tex()), ("b", B_.tex()), ("c", C.tex()))
+    h += p("सूत्र में मान रखने पर:")
+    h += lines(f"\\left({expr}\\right)^2", f"{B(A)}^2 + {B(B_)}^2 + {B(C)}^2 + 2{B(A)}{B(B_)} + 2{B(B_)}{B(C)} + 2{B(C)}{B(A)}")
+    h += p("अब हर पद को अलग-अलग हल करते हैं:")
+    res = []
+    for M_ in (A, B_, C):
+        t, R = sq_rows(M_)
+        h += t
+        res.append(R)
+    for M1, M2 in ((A, B_), (B_, C), (C, A)):
+        t, R = prod_rows(2, [M1, M2])
+        h += t
+        res.append(R)
+    out = sumt(res)
+    h += p("सभी पद जोड़ने पर:")
+    h += lines(f"\\left({expr}\\right)^2", out)
+    return h, out
+
+
+def cube(expr, A, B_, sign):
+    s = "+" if sign > 0 else "-"
+    nm = "VI" if sign > 0 else "VII"
+    h = formula(f"सर्वसमिका {nm}", m(f"(a {s} b)^3 = a^3 {s} 3a^2b + 3ab^2 {s} b^3"))
+    h += lines(expr, f"{B(A)} {s} {B(B_)}")
+    h += eqs(("a", A.tex()), ("b", B_.tex()))
+    h += p("सूत्र में मान रखने पर:")
+    h += lines(f"\\left({expr}\\right)^3", f"{B(A)}^3 {s} 3{B(A)}^2{B(B_)} + 3{B(A)}{B(B_)}^2 {s} {B(B_)}^3")
+    h += p("अब हर पद को अलग-अलग हल करते हैं:")
+    t, a3 = cube_rows(A)
+    h += t
+    t, a2 = sq_rows(A)
+    h += t
+    t, b2 = sq_rows(B_)
+    h += t
+    t, m1 = prod_rows(3, [a2, B_], f"3{B(A)}^2{B(B_)}")
+    h += t
+    t, m2 = prod_rows(3, [A, b2], f"3{B(A)}{B(B_)}^2")
+    h += t
+    t, b3 = cube_rows(B_)
+    h += t
+    terms = [a3, m1 if sign > 0 else -m1, m2, b3 if sign > 0 else -b3]
+    out = sumt(terms)
+    h += p("सभी पद रखने पर:")
+    h += lines(f"\\left({expr}\\right)^3", out)
+    return h, out
+
+
+def numcube(n, a, b, sign):
+    s = "+" if sign > 0 else "-"
+    h = formula(f"सर्वसमिका {'VI' if sign > 0 else 'VII'}", m(f"(a {s} b)^3 = a^3 {s} 3a^2b + 3ab^2 {s} b^3"))
+    h += lines(f"{n}", f"{a} {s} {b}")
+    h += eqs(("a", str(a)), ("b", str(b)))
+    vals = [a ** 3, sign * 3 * a * a * b, 3 * a * b * b, sign * b ** 3]
+    h += lines(f"{n}^3", f"({a} {s} {b})^3", f"({a})^3 {s} 3 \\times ({a})^2 \\times {b} + 3 \\times {a} \\times ({b})^2 {s} ({b})^3",
+               f"{a ** 3} {s} 3 \\times {a * a} \\times {b} + 3 \\times {a} \\times {b * b} {s} {b ** 3}",
+               chain(vals))
+    v = vals[:]
+    rows = []
+    while len(v) > 1:
+        v = [v[0] + v[1]] + v[2:]
+        rows.append(chain(v))
+    h += lines("", *rows) if False else lines(f"{n}^3", *rows)
+    assert v[0] == n ** 3
+    return h, v[0]
+
+
+E4 = []
+# Q1
+s = formula("सर्वसमिकाएँ", "", [m("(x + a)(x + b) = x^2 + (a + b)x + ab") + " &nbsp;(सर्वसमिका IV)", m("(a + b)(a - b) = a^2 - b^2") + " &nbsp;(सर्वसमिका III)"])
+s += part("(i) " + m("(x + 4)(x + 10)"), p("सूत्र (1) में " + m("a = 4,\\ b = 10") + ":")
+          + lines("(x + 4)(x + 10)", "x^2 + (4 + 10)x + 4 \\times 10", "x^2 + 14x + 40") + ans(m("x^2 + 14x + 40")))
+s += part("(ii) " + m("(x + 8)(x - 10)"), lines("(x + 8)(x - 10)", "(x + 8)(x + (-10))") + p("सूत्र (1) में " + m("a = 8,\\ b = -10") + ":")
+          + lines("(x + 8)(x - 10)", "x^2 + (8 + (-10))x + 8 \\times (-10)", "x^2 + (8 - 10)x + (-80)", "x^2 + (-2)x - 80", "x^2 - 2x - 80") + ans(m("x^2 - 2x - 80")))
+s += part("(iii) " + m("(3x + 4)(3x - 5)"), p("यहाँ " + m("3x") + " को सूत्र का " + m("x") + " मानते हैं, " + m("a = 4,\\ b = -5") + ":")
+          + lines("(3x + 4)(3x - 5)", "(3x)^2 + (4 + (-5))(3x) + 4 \\times (-5)", "(3x)^2 + (4 - 5)(3x) - 20", "3^2 \\times x^2 + (-1)(3x) - 20", "9x^2 - 3x - 20") + ans(m("9x^2 - 3x - 20")))
+s += part("(iv) " + m("\\left(y^2 + \\dfrac{3}{2}\\right)\\left(y^2 - \\dfrac{3}{2}\\right)"), p("सूत्र (2) में " + m("a = y^2,\\ b = \\dfrac{3}{2}") + ":")
+          + lines("\\left(y^2 + \\dfrac{3}{2}\\right)\\left(y^2 - \\dfrac{3}{2}\\right)", "(y^2)^2 - \\left(\\dfrac{3}{2}\\right)^2", "y^{2 \\times 2} - \\dfrac{3^2}{2^2}", "y^4 - \\dfrac{9}{4}") + ans(m("y^4 - \\dfrac{9}{4}")))
+s += part("(v) " + m("(3 - 2x)(3 + 2x)"), lines("(3 - 2x)(3 + 2x)", "(3 + 2x)(3 - 2x)") + p("सूत्र (2) में " + m("a = 3,\\ b = 2x") + ":")
+          + lines("(3 + 2x)(3 - 2x)", "3^2 - (2x)^2", "9 - 2^2 \\times x^2", "9 - 4x^2") + ans(m("9 - 4x^2")))
+s += ans("(i) " + m("x^2 + 14x + 40") + " (ii) " + m("x^2 - 2x - 80") + " (iii) " + m("9x^2 - 3x - 20") + " (iv) " + m("y^4 - \\dfrac{9}{4}") + " (v) " + m("9 - 4x^2"))
+E4.append((qt("उपयुक्त सर्वसमिकाओं को प्रयोग करके निम्नलिखित गुणनफल ज्ञात कीजिए: (i) " + m("(x + 4)(x + 10)") + " (ii) " + m("(x + 8)(x - 10)") + " (iii) " + m("(3x + 4)(3x - 5)")
+              + " (iv) " + m("\\left(y^2 + \\dfrac{3}{2}\\right)\\left(y^2 - \\dfrac{3}{2}\\right)") + " (v) " + m("(3 - 2x)(3 + 2x)")), s))
+
+# Q2
+s = formula("सर्वसमिकाएँ", "", [m("(x + a)(x + b) = x^2 + (a + b)x + ab"), m("(a + b)(a - b) = a^2 - b^2")])
+s += part("(i) " + m("103 \\times 107"), lines("103 \\times 107", "(100 + 3)(100 + 7)") + p("सूत्र (1) में " + m("x = 100,\\ a = 3,\\ b = 7") + ":")
+          + lines("103 \\times 107", "100^2 + (3 + 7) \\times 100 + 3 \\times 7", "10000 + 10 \\times 100 + 21", "10000 + 1000 + 21", "11000 + 21", "11021") + ans(m("11021")))
+s += part("(ii) " + m("95 \\times 96"), lines("95 \\times 96", "(100 - 5)(100 - 4)", "(100 + (-5))(100 + (-4))") + p("सूत्र (1) में " + m("x = 100,\\ a = -5,\\ b = -4") + ":")
+          + lines("95 \\times 96", "100^2 + ((-5) + (-4)) \\times 100 + (-5) \\times (-4)", "10000 + (-9) \\times 100 + 20", "10000 - 900 + 20", "9100 + 20", "9120") + ans(m("9120")))
+s += part("(iii) " + m("104 \\times 96"), lines("104 \\times 96", "(100 + 4)(100 - 4)") + p("सूत्र (2) में " + m("a = 100,\\ b = 4") + ":")
+          + lines("104 \\times 96", "100^2 - 4^2", "10000 - 16", "9984") + ans(m("9984")))
+s += ans("(i) 11021 (ii) 9120 (iii) 9984")
+E4.append((qt("सीधे गुणा किए बिना निम्नलिखित गुणनफलों के मान ज्ञात कीजिए: (i) " + m("103 \\times 107") + " (ii) " + m("95 \\times 96") + " (iii) " + m("104 \\times 96")), s))
+
+# Q3
+s = formula("सर्वसमिकाएँ", "", [m("a^2 + 2ab + b^2 = (a + b)^2"), m("a^2 - 2ab + b^2 = (a - b)^2"), m("a^2 - b^2 = (a + b)(a - b)")])
+s += part("(i) " + m("9x^2 + 6xy + y^2"), lines("9x^2", "3^2 \\times x^2", "(3x)^2") + lines("6xy", "2 \\times 3x \\times y", "2(3x)(y)")
+          + lines("9x^2 + 6xy + y^2", "(3x)^2 + 2(3x)(y) + (y)^2") + p("सूत्र (1) में " + m("a = 3x,\\ b = y") + ":") + lines("9x^2 + 6xy + y^2", "(3x + y)^2", "(3x + y)(3x + y)") + ans(m("(3x + y)(3x + y)")))
+s += part("(ii) " + m("4y^2 - 4y + 1"), lines("4y^2", "2^2 \\times y^2", "(2y)^2") + lines("4y", "2 \\times 2y \\times 1", "2(2y)(1)") + lines("1", "1^2")
+          + lines("4y^2 - 4y + 1", "(2y)^2 - 2(2y)(1) + (1)^2") + p("सूत्र (2) में " + m("a = 2y,\\ b = 1") + ":") + lines("4y^2 - 4y + 1", "(2y - 1)^2", "(2y - 1)(2y - 1)") + ans(m("(2y - 1)(2y - 1)")))
+s += part("(iii) " + m("x^2 - \\dfrac{y^2}{100}"), lines("\\dfrac{y^2}{100}", "\\dfrac{y^2}{10^2}", "\\left(\\dfrac{y}{10}\\right)^2") + lines("x^2 - \\dfrac{y^2}{100}", "(x)^2 - \\left(\\dfrac{y}{10}\\right)^2")
+          + p("सूत्र (3) में " + m("a = x,\\ b = \\dfrac{y}{10}") + ":") + lines("x^2 - \\dfrac{y^2}{100}", "\\left(x + \\dfrac{y}{10}\\right)\\left(x - \\dfrac{y}{10}\\right)") + ans(m("\\left(x + \\dfrac{y}{10}\\right)\\left(x - \\dfrac{y}{10}\\right)")))
+s += ans("(i) " + m("(3x + y)(3x + y)") + " (ii) " + m("(2y - 1)(2y - 1)") + " (iii) " + m("\\left(x + \\dfrac{y}{10}\\right)\\left(x - \\dfrac{y}{10}\\right)"))
+E4.append((qt("उपयुक्त सर्वसमिकाएँ प्रयोग करके निम्नलिखित का गुणनखंडन कीजिए: (i) " + m("9x^2 + 6xy + y^2") + " (ii) " + m("4y^2 - 4y + 1") + " (iii) " + m("x^2 - \\dfrac{y^2}{100}")), s))
+
+# Q4
+x_, y_, z_, a_, b_ = (lambda c=1: X("x", c)), (lambda c=1: X("y", c)), (lambda c=1: X("z", c)), (lambda c=1: X("a", c)), (lambda c=1: X("b", c))
+Q4 = [("(i)", "x + 2y + 4z", x_(), y_(2), z_(4)), ("(ii)", "2x - y + z", x_(2), y_(-1), z_()), ("(iii)", "-2x + 3y + 2z", x_(-2), y_(3), z_(2)),
+      ("(iv)", "3a - 7b - c", a_(3), b_(-7), X("c", -1)), ("(v)", "-2x + 5y - 3z", x_(-2), y_(5), z_(-3)),
+      ("(vi)", "\\dfrac{1}{4}a - \\dfrac{1}{2}b + 1", a_(F(1, 4)), b_(F(-1, 2)), Mo(1))]
+s = ""
+outs = []
+for lab, ex, A, B_, C in Q4:
+    h, out = sq3(ex, A, B_, C)
+    s += part(lab + " " + m(f"\\left({ex}\\right)^2"), h + ans(m(out)))
+    outs.append(lab + " " + m(out))
+s += ans(" ".join(outs))
+E4.append((qt("उपयुक्त सर्वसमिकाओं का प्रयोग करके निम्नलिखित में से प्रत्येक का प्रसार कीजिए: " + " ".join(f"{lab} " + m(f"\\left({ex}\\right)^2") for lab, ex, *_ in Q4)), s))
+
+
+# Q5
+def sq3fact(given, sq_parts, cross, A, B_, C, why_sign):
+    h = SQ3
+    for t_, rows in sq_parts:
+        h += lines(t_, *rows)
+    h += p("बीच वाले पदों (" + m("2ab,\\ 2bc,\\ 2ca") + ") के चिह्न देखकर a, b, c के चिह्न तय करते हैं:")
+    h += why(why_sign)
+    h += eqs(("a", A.tex()), ("b", B_.tex()), ("c", C.tex()))
+    h += p("जाँच (हर बीच वाला पद अलग-अलग):")
+    for M1, M2 in ((A, B_), (B_, C), (C, A)):
+        t, R = prod_rows(2, [M1, M2])
+        h += t
+    res = [A * A, B_ * B_, C * C, 2 * A * B_, 2 * B_ * C, 2 * C * A]
+    h += p("माना " + m("E = " + given) + "। तब")
+    h += lines("E", f"{B(A)}^2 + {B(B_)}^2 + {B(C)}^2 + 2{B(A)}{B(B_)} + 2{B(B_)}{B(C)} + 2{B(C)}{B(A)}", f"\\left({sumt([A, B_, C])}\\right)^2")
+    return h, f"\\left({sumt([A, B_, C])}\\right)^2", res
+
+
+s = ""
+g1 = "4x^2 + 9y^2 + 16z^2 + 12xy - 24yz - 16xz"
+h, r1, res = sq3fact(g1, [("4x^2", ["2^2 \\times x^2", "(2x)^2"]), ("9y^2", ["3^2 \\times y^2", "(3y)^2"]), ("16z^2", ["4^2 \\times z^2", "(4z)^2"])], None,
+                     x_(2), y_(3), z_(-4), m("+12xy") + " धनात्मक है, अतः " + m("2x") + " और " + m("3y") + " का चिह्न एक-सा; " + m("-24yz") + " और " + m("-16xz") + " ऋणात्मक हैं, अतः " + m("4z") + " का चिह्न उलटा, यानी " + m("c = -4z") + "।")
+assert [t.tex() for t in res] == ["4x^{2}", "9y^{2}", "16z^{2}", "12xy", "-24yz", "-16xz"], [t.tex() for t in res]
+s += part("(i) " + m(g1), h + ans(m(r1) + " = " + m("(2x + 3y - 4z)(2x + 3y - 4z)")))
+g2 = "2x^2 + y^2 + 8z^2 - 2\\sqrt{2}xy + 4\\sqrt{2}yz - 8xz"
+h, r2, res = sq3fact(g2, [("2x^2", ["(\\sqrt{2})^2 \\times x^2", "(\\sqrt{2}x)^2"]), ("y^2", ["(y)^2"]), ("8z^2", ["4 \\times 2 \\times z^2", "2^2 \\times (\\sqrt{2})^2 \\times z^2", "(2\\sqrt{2}z)^2"])], None,
+                     X("x", -1, 1), y_(), X("z", 2, 1), m("+4\\sqrt{2}yz") + " धनात्मक है, अतः " + m("y") + " और " + m("2\\sqrt{2}z") + " का चिह्न एक-सा; " + m("-2\\sqrt{2}xy") + " और " + m("-8xz") + " ऋणात्मक हैं, अतः " + m("\\sqrt{2}x") + " का चिह्न उलटा, यानी " + m("a = -\\sqrt{2}x") + "।")
+assert [t.tex() for t in res] == ["2x^{2}", "y^{2}", "8z^{2}", "-2\\sqrt{2}xy", "4\\sqrt{2}yz", "-8xz"], [t.tex() for t in res]
+s += part("(ii) " + m(g2), h + ans(m(r2) + " = " + m("(-\\sqrt{2}x + y + 2\\sqrt{2}z)(-\\sqrt{2}x + y + 2\\sqrt{2}z)")))
+s += ans("(i) " + m("(2x + 3y - 4z)(2x + 3y - 4z)") + " (ii) " + m("(-\\sqrt{2}x + y + 2\\sqrt{2}z)(-\\sqrt{2}x + y + 2\\sqrt{2}z)"))
+E4.append((qt("गुणनखंडन कीजिए: (i) " + m(g1) + " (ii) " + m(g2)), s))
+
+# Q6
+Q6 = [("(i)", "2x + 1", x_(2), Mo(1), 1), ("(ii)", "2a - 3b", a_(2), b_(3), -1), ("(iii)", "\\dfrac{3}{2}x + 1", x_(F(3, 2)), Mo(1), 1), ("(iv)", "x - \\dfrac{2}{3}y", x_(), y_(F(2, 3)), -1)]
+s = ""
+outs = []
+for lab, ex, A, B_, sg in Q6:
+    h, out = cube(ex, A, B_, sg)
+    s += part(lab + " " + m(f"\\left({ex}\\right)^3"), h + ans(m(out)))
+    outs.append(lab + " " + m(out))
+s += ans(" ".join(outs))
+E4.append((qt("निम्नलिखित घनों में से प्रत्येक का प्रसारित रूप लिखिए: " + " ".join(f"{lab} " + m(f"\\left({ex}\\right)^3") for lab, ex, *_ in Q6)), s))
+
+# Q7
+s = ""
+outs = []
+for lab, n, a, b, sg in (("(i)", 99, 100, 1, -1), ("(ii)", 102, 100, 2, 1), ("(iii)", 998, 1000, 2, -1)):
+    h, v = numcube(n, a, b, sg)
+    s += part(lab + " " + m(f"{n}^3"), h + ans(m(str(v))))
+    outs.append(f"{lab} {v}")
+s += ans(" ".join(outs))
+E4.append((qt("उपयुक्त सर्वसमिकाओं को प्रयोग करके निम्नलिखित के मान ज्ञात कीजिए: (i) " + m("(99)^3") + " (ii) " + m("(102)^3") + " (iii) " + m("(998)^3")), s))
+
+
+# Q8
+def cubefact(given, A, B_, sg, cube_split):
+    s_ = "+" if sg > 0 else "-"
+    h = formula(f"सर्वसमिका {'VI' if sg > 0 else 'VII'}", m(f"a^3 {s_} 3a^2b + 3ab^2 {s_} b^3 = (a {s_} b)^3"))
+    h += p("पहले घन वाले पद पहचानते हैं:")
+    for t_, rows in cube_split:
+        h += lines(t_, *rows)
+    h += eqs(("a", A.tex()), ("b", B_.tex()))
+    h += p("अब बीच वाले पद जाँचते हैं:")
+    t, a2 = sq_rows(A)
+    h += t
+    t, b2 = sq_rows(B_)
+    h += t
+    t, m1 = prod_rows(3, [a2, B_], f"3{B(A)}^2{B(B_)}")
+    h += t
+    t, m2 = prod_rows(3, [A, b2], f"3{B(A)}{B(B_)}^2")
+    h += t
+    h += p("दोनों पद दिए गए व्यंजक में हैं। पदों को सूत्र के क्रम में लिखने पर:")
+    out = f"\\left({A.tex()} {s_} {B_.tex()}\\right)^3"
+    h += p("माना " + m("E = " + given) + "। तब")
+    h += lines("E", f"{B(A)}^3 {s_} 3{B(A)}^2{B(B_)} + 3{B(A)}{B(B_)}^2 {s_} {B(B_)}^3", out)
+    return h, out, (m1.tex(), m2.tex())
+
+
+Q8 = [("(i)", "8a^3 + b^3 + 12a^2b + 6ab^2", a_(2), b_(), 1, [("8a^3", ["2 \\times 2 \\times 2 \\times a^3", "2^3 \\times a^3", "(2a)^3"]), ("b^3", ["(b)^3"])], ("12a^{2}b", "6ab^{2}")),
+      ("(ii)", "8a^3 - b^3 - 12a^2b + 6ab^2", a_(2), b_(), -1, [("8a^3", ["2 \\times 2 \\times 2 \\times a^3", "(2a)^3"]), ("b^3", ["(b)^3"])], ("12a^{2}b", "6ab^{2}")),
+      ("(iii)", "27 - 125a^3 - 135a + 225a^2", Mo(3), a_(5), -1, [("27", ["3 \\times 3 \\times 3", "3^3"]), ("125a^3", ["5 \\times 5 \\times 5 \\times a^3", "(5a)^3"])], ("135a", "225a^{2}")),
+      ("(iv)", "64a^3 - 27b^3 - 144a^2b + 108ab^2", a_(4), b_(3), -1, [("64a^3", ["4 \\times 4 \\times 4 \\times a^3", "(4a)^3"]), ("27b^3", ["3 \\times 3 \\times 3 \\times b^3", "(3b)^3"])], ("144a^{2}b", "108ab^{2}")),
+      ("(v)", "27p^3 - \\dfrac{1}{216} - \\dfrac{9}{2}p^2 + \\dfrac{1}{4}p", X("p", 3), Mo(F(1, 6)), -1,
+       [("27p^3", ["3 \\times 3 \\times 3 \\times p^3", "(3p)^3"]), ("\\dfrac{1}{216}", ["\\dfrac{1}{6 \\times 6 \\times 6}", "\\left(\\dfrac{1}{6}\\right)^3"])], ("\\dfrac{9}{2}p^{2}", "\\dfrac{1}{4}p"))]
+s = ""
+outs = []
+for lab, g, A, B_, sg, cs_, expect in Q8:
+    h, out, got = cubefact(g, A, B_, sg, cs_)
+    assert got == expect, (lab, got)
+    long_ = f"\\left({A.tex()} {'+' if sg > 0 else '-'} {B_.tex()}\\right)" * 3
+    s += part(lab + " " + m(g), h + ans(m(out) + " = " + m(long_)))
+    outs.append(lab + " " + m(long_))
+s += ans(" ".join(outs))
+E4.append((qt("गुणनखंडन कीजिए: " + " ".join(f"{lab} " + m(g) for lab, g, *_ in Q8)), s))
+
+# Q9
+s = part("(i) " + m("x^3 + y^3 = (x + y)(x^2 - xy + y^2)"),
+         p("दायाँ पक्ष लेते हैं और पहले कोष्ठक के हर पद से दूसरे कोष्ठक को अलग-अलग गुणा करते हैं:")
+         + lines("\\text{RHS}", "(x + y)(x^2 - xy + y^2)", "x(x^2 - xy + y^2) + y(x^2 - xy + y^2)")
+         + lines("x(x^2 - xy + y^2)", "x \\times x^2 - x \\times xy + x \\times y^2", "x^3 - x^2y + xy^2")
+         + lines("y(x^2 - xy + y^2)", "y \\times x^2 - y \\times xy + y \\times y^2", "x^2y - xy^2 + y^3")
+         + lines("\\text{RHS}", "x^3 - x^2y + xy^2 + x^2y - xy^2 + y^3", "x^3 + (-x^2y + x^2y) + (xy^2 - xy^2) + y^3", "x^3 + 0 + 0 + y^3", "x^3 + y^3", "\\text{LHS}")
+         + ans("सत्यापित।"))
+s += part("(ii) " + m("x^3 - y^3 = (x - y)(x^2 + xy + y^2)"),
+          lines("\\text{RHS}", "(x - y)(x^2 + xy + y^2)", "x(x^2 + xy + y^2) - y(x^2 + xy + y^2)")
+          + lines("x(x^2 + xy + y^2)", "x \\times x^2 + x \\times xy + x \\times y^2", "x^3 + x^2y + xy^2")
+          + lines("y(x^2 + xy + y^2)", "y \\times x^2 + y \\times xy + y \\times y^2", "x^2y + xy^2 + y^3")
+          + lines("\\text{RHS}", "x^3 + x^2y + xy^2 - (x^2y + xy^2 + y^3)", "x^3 + x^2y + xy^2 - x^2y - xy^2 - y^3", "x^3 + (x^2y - x^2y) + (xy^2 - xy^2) - y^3", "x^3 + 0 + 0 - y^3", "x^3 - y^3", "\\text{LHS}")
+          + ans("सत्यापित।"))
+E4.append((qt("सत्यापित कीजिए: (i) " + m("x^3 + y^3 = (x + y)(x^2 - xy + y^2)") + " (ii) " + m("x^3 - y^3 = (x - y)(x^2 + xy + y^2)")), s))
+
+# Q10
+s = formula("सर्वसमिकाएँ", "", [m("a^3 + b^3 = (a + b)(a^2 - ab + b^2)"), m("a^3 - b^3 = (a - b)(a^2 + ab + b^2)")])
+s += part("(i) " + m("27y^3 + 125z^3"), lines("27y^3", "3 \\times 3 \\times 3 \\times y^3", "(3y)^3") + lines("125z^3", "5 \\times 5 \\times 5 \\times z^3", "(5z)^3")
+          + p("सूत्र (1) में " + m("a = 3y,\\ b = 5z") + ":")
+          + lines("27y^3 + 125z^3", "(3y)^3 + (5z)^3", "(3y + 5z)[(3y)^2 - (3y)(5z) + (5z)^2]", "(3y + 5z)[3^2 \\times y^2 - 3 \\times 5 \\times y \\times z + 5^2 \\times z^2]", "(3y + 5z)(9y^2 - 15yz + 25z^2)")
+          + ans(m("(3y + 5z)(9y^2 - 15yz + 25z^2)")))
+s += part("(ii) " + m("64m^3 - 343n^3"), lines("64m^3", "4 \\times 4 \\times 4 \\times m^3", "(4m)^3") + lines("343n^3", "7 \\times 7 \\times 7 \\times n^3", "(7n)^3")
+          + p("सूत्र (2) में " + m("a = 4m,\\ b = 7n") + ":")
+          + lines("64m^3 - 343n^3", "(4m)^3 - (7n)^3", "(4m - 7n)[(4m)^2 + (4m)(7n) + (7n)^2]", "(4m - 7n)[4^2 \\times m^2 + 4 \\times 7 \\times m \\times n + 7^2 \\times n^2]", "(4m - 7n)(16m^2 + 28mn + 49n^2)")
+          + ans(m("(4m - 7n)(16m^2 + 28mn + 49n^2)")))
+s += ans("(i) " + m("(3y + 5z)(9y^2 - 15yz + 25z^2)") + " (ii) " + m("(4m - 7n)(16m^2 + 28mn + 49n^2)"))
+E4.append((qt("गुणनखंडन कीजिए: (i) " + m("27y^3 + 125z^3") + " (ii) " + m("64m^3 - 343n^3")), s))
+
+# Q11
+ID8 = formula("सर्वसमिका VIII", m("a^3 + b^3 + c^3 - 3abc = (a + b + c)(a^2 + b^2 + c^2 - ab - bc - ca)"))
+s = ID8
+s += lines("27x^3", "3 \\times 3 \\times 3 \\times x^3", "(3x)^3") + lines("9xyz", "3 \\times 3x \\times y \\times z", "3(3x)(y)(z)")
+s += lines("27x^3 + y^3 + z^3 - 9xyz", "(3x)^3 + (y)^3 + (z)^3 - 3(3x)(y)(z)")
+s += p("सूत्र में " + m("a = 3x,\\ b = y,\\ c = z") + ":")
+s += lines("27x^3 + y^3 + z^3 - 9xyz", "(3x + y + z)[(3x)^2 + y^2 + z^2 - (3x)(y) - (y)(z) - (z)(3x)]", "(3x + y + z)(9x^2 + y^2 + z^2 - 3xy - yz - 3zx)")
+s += ans(m("(3x + y + z)(9x^2 + y^2 + z^2 - 3xy - yz - 3zx)"))
+E4.append(("गुणनखंडन कीजिए: " + m("27x^3 + y^3 + z^3 - 9xyz"), s))
+
+# Q12
+s = p("दायाँ पक्ष (RHS) लेते हैं। पहले बड़े कोष्ठक के तीनों वर्ग अलग-अलग:")
+s += formula("सर्वसमिका II", m("(a - b)^2 = a^2 - 2ab + b^2"))
+s += lines("(x - y)^2", "x^2 - 2xy + y^2") + lines("(y - z)^2", "y^2 - 2yz + z^2") + lines("(z - x)^2", "z^2 - 2zx + x^2")
+s += lines("(x - y)^2 + (y - z)^2 + (z - x)^2", "x^2 - 2xy + y^2 + y^2 - 2yz + z^2 + z^2 - 2zx + x^2", "(x^2 + x^2) + (y^2 + y^2) + (z^2 + z^2) - 2xy - 2yz - 2zx",
+           "2x^2 + 2y^2 + 2z^2 - 2xy - 2yz - 2zx", "2(x^2 + y^2 + z^2 - xy - yz - zx)")
+s += lines("\\text{RHS}", "\\dfrac{1}{2}(x + y + z) \\times 2(x^2 + y^2 + z^2 - xy - yz - zx)", "\\dfrac{2}{2}(x + y + z)(x^2 + y^2 + z^2 - xy - yz - zx)", "(x + y + z)(x^2 + y^2 + z^2 - xy - yz - zx)")
+s += p("अब पहले कोष्ठक के हर पद से दूसरे कोष्ठक को अलग-अलग गुणा करते हैं:")
+s += lines("x(x^2 + y^2 + z^2 - xy - yz - zx)", "x^3 + xy^2 + xz^2 - x^2y - xyz - x^2z")
+s += lines("y(x^2 + y^2 + z^2 - xy - yz - zx)", "x^2y + y^3 + yz^2 - xy^2 - y^2z - xyz")
+s += lines("z(x^2 + y^2 + z^2 - xy - yz - zx)", "x^2z + y^2z + z^3 - xyz - yz^2 - xz^2")
+s += p("तीनों को जोड़ते हैं। समान पद आपस में कट जाते हैं:")
+s += lines("\\text{RHS}", "x^3 + y^3 + z^3 + (xy^2 - xy^2) + (xz^2 - xz^2) + (x^2y - x^2y) + (yz^2 - yz^2) + (x^2z - x^2z) + (y^2z - y^2z) - xyz - xyz - xyz",
+           "x^3 + y^3 + z^3 + 0 - 3xyz", "x^3 + y^3 + z^3 - 3xyz", "\\text{LHS}")
+s += ans("सत्यापित।")
+E4.append(("सत्यापित कीजिए: " + m("x^3 + y^3 + z^3 - 3xyz = \\dfrac{1}{2}(x + y + z)[(x - y)^2 + (y - z)^2 + (z - x)^2]"), s))
+
+# Q13
+s = ID8.replace("a^3 + b^3 + c^3 - 3abc = (a + b + c)(a^2 + b^2 + c^2 - ab - bc - ca)", "x^3 + y^3 + z^3 - 3xyz = (x + y + z)(x^2 + y^2 + z^2 - xy - yz - zx)")
+s += p("दिया है: " + m("x + y + z = 0") + "। सूत्र में रखने पर:")
+s += lines("x^3 + y^3 + z^3 - 3xyz", "(0)(x^2 + y^2 + z^2 - xy - yz - zx)", "0")
+s += eqs(("x^3 + y^3 + z^3 - 3xyz", "0")) + tp("पक्षांतर: −3xyz दाएँ पक्ष में +3xyz हो जाता है।".replace("−3xyz", m("-3xyz")).replace("+3xyz हो", m("+3xyz") + " हो"))
+s += eqs(("x^3 + y^3 + z^3", "3xyz")) + ans("सिद्ध हुआ: " + m("x^3 + y^3 + z^3 = 3xyz"))
+E4.append(("दर्शाइए कि " + m("x^3 + y^3 + z^3 = 3xyz") + " होता है, यदि " + m("x + y + z = 0") + " हो।", s))
+
+# Q14
+s = formula("प्रश्न 13 का परिणाम", "यदि " + m("a + b + c = 0") + " हो, तो " + m("a^3 + b^3 + c^3 = 3abc") + "।")
+s += part("(i) " + m("(-12)^3 + (7)^3 + (5)^3"), eqs(("a", "-12"), ("b", "7"), ("c", "5")) + lines("a + b + c", "-12 + 7 + 5", "-5 + 5", "0")
+          + lines("(-12)^3 + (7)^3 + (5)^3", "3 \\times (-12) \\times 7 \\times 5", "(-36) \\times 7 \\times 5", "(-252) \\times 5", "-1260") + ans(m("-1260")))
+s += part("(ii) " + m("(28)^3 + (-15)^3 + (-13)^3"), eqs(("a", "28"), ("b", "-15"), ("c", "-13")) + lines("a + b + c", "28 + (-15) + (-13)", "28 - 15 - 13", "13 - 13", "0")
+          + lines("(28)^3 + (-15)^3 + (-13)^3", "3 \\times 28 \\times (-15) \\times (-13)", "84 \\times (-15) \\times (-13)", "(-1260) \\times (-13)", "16380") + ans(m("16380")))
+assert (-12) ** 3 + 7 ** 3 + 5 ** 3 == -1260 and 28 ** 3 - 15 ** 3 - 13 ** 3 == 16380
+s += ans("(i) −1260 (ii) 16380")
+E4.append((qt("वास्तव में घनों का परिकलन किए बिना निम्नलिखित में से प्रत्येक का मान ज्ञात कीजिए: (i) " + m("(-12)^3 + (7)^3 + (5)^3") + " (ii) " + m("(28)^3 + (-15)^3 + (-13)^3")), s))
+
+# Q15
+s = formula("आयत का क्षेत्रफल", m("\\text{क्षेत्रफल} = \\text{लंबाई} \\times \\text{चौड़ाई}").replace("\\text{क्षेत्रफल}", "A").replace("\\text{लंबाई}", "l").replace("\\text{चौड़ाई}", "b") + " (A = क्षेत्रफल, l = लंबाई, b = चौड़ाई)")
+s += p("अतः क्षेत्रफल के व्यंजक के दो गुणनखंड ही लंबाई और चौड़ाई होंगे।")
+outs = []
+for lab, (a, b, c), v, L, Bd in (("(i)", (25, -35, 12), "a", "5a - 3", "5a - 4"), ("(ii)", (35, 13, -12), "y", "7y - 3", "5y + 4")):
+    h, f1, f2 = split_quad(a, b, c, v)
+    r = fac_tex(f1, v) + fac_tex(f2, v)
+    s += part(lab + " क्षेत्रफल " + m(poly([a, b, c], v)), h + ans("लंबाई और चौड़ाई के संभव व्यंजक: " + m(f"({L})") + " और " + m(f"({Bd})")))
+    assert sorted([poly(list(f1), v), poly(list(f2), v)]) == sorted([L, Bd]), (f1, f2)
+    outs.append(lab + " " + m(f"({L})") + " और " + m(f"({Bd})"))
+s += ans(" ".join(outs))
+E4.append((qt("नीचे दिए गए आयतों, जिनमें उनके क्षेत्रफल दिए गए हैं, में से प्रत्येक की लंबाई और चौड़ाई के लिए संभव व्यंजक दीजिए: (i) क्षेत्रफल: " + m("25a^2 - 35a + 12") + " (ii) क्षेत्रफल: " + m("35y^2 + 13y - 12")), s))
+
+# Q16
+s = formula("घनाभ का आयतन", m("V = l \\times b \\times h") + " (लंबाई × चौड़ाई × ऊँचाई)")
+s += p("अतः आयतन के व्यंजक के तीन गुणनखंड ही विमाएँ होंगी।")
+h = lines("3x^2", "3 \\times x \\times x") + lines("12x", "3 \\times 4 \\times x") + p("दोनों पदों में " + m("3x") + " उभयनिष्ठ है:")
+h += lines("3x^2 - 12x", "3x \\times x - 3x \\times 4", "3x(x - 4)", "3 \\times x \\times (x - 4)")
+s += part("(i) आयतन " + m("3x^2 - 12x"), h + ans("विमाओं के संभव व्यंजक: " + m("3,\\ x") + " और " + m("(x - 4)")))
+h = lines("12ky^2", "4k \\times 3y^2") + lines("8ky", "4k \\times 2y") + lines("20k", "4k \\times 5") + p("तीनों पदों में " + m("4k") + " उभयनिष्ठ है:")
+h += lines("12ky^2 + 8ky - 20k", "4k \\times 3y^2 + 4k \\times 2y - 4k \\times 5", "4k(3y^2 + 2y - 5)")
+h += p("अब " + m("3y^2 + 2y - 5") + " के गुणनखंड:")
+t, f1, f2 = split_quad(3, 2, -5, "y")
+h += t
+h += lines("12ky^2 + 8ky - 20k", "4k" + fac_tex(f1, "y") + fac_tex(f2, "y"))
+assert sorted([poly(list(f1), "y"), poly(list(f2), "y")]) == ["3y + 5", "y - 1"]
+s += part("(ii) आयतन " + m("12ky^2 + 8ky - 20k"), h + ans("विमाओं के संभव व्यंजक: " + m("4k,\\ (3y + 5)") + " और " + m("(y - 1)")))
+s += ans("(i) " + m("3,\\ x,\\ (x - 4)") + " (ii) " + m("4k,\\ (3y + 5),\\ (y - 1)"))
+E4.append((qt("घनाभों, जिनके आयतन नीचे दिए गए हैं, की विमाओं के लिए संभव व्यंजक क्या हैं? (i) आयतन: " + m("3x^2 - 12x") + " (ii) आयतन: " + m("12ky^2 + 8ky - 20k")), s))
+assert len(E4) == 16
+
+try:  # optional algebra check (sympy is not needed for the build)
+    import sympy as _sp
+    _x, _y, _z, _a, _b, _c, _p = _sp.symbols("x y z a b c p")
+    _ok = [
+        _sp.expand((_x + 2*_y + 4*_z)**2) == _x**2 + 4*_y**2 + 16*_z**2 + 4*_x*_y + 16*_y*_z + 8*_x*_z,
+        _sp.expand((2*_x + 3*_y - 4*_z)**2 - (4*_x**2 + 9*_y**2 + 16*_z**2 + 12*_x*_y - 24*_y*_z - 16*_x*_z)) == 0,
+        _sp.expand((-_sp.sqrt(2)*_x + _y + 2*_sp.sqrt(2)*_z)**2 - (2*_x**2 + _y**2 + 8*_z**2 - 2*_sp.sqrt(2)*_x*_y + 4*_sp.sqrt(2)*_y*_z - 8*_x*_z)) == 0,
+        _sp.expand((3*_p - _sp.Rational(1, 6))**3 - (27*_p**3 - _sp.Rational(1, 216) - _sp.Rational(9, 2)*_p**2 + _sp.Rational(1, 4)*_p)) == 0,
+        _sp.expand((5*_a - 3)*(5*_a - 4)) == 25*_a**2 - 35*_a + 12, _sp.expand((7*_y - 3)*(5*_y + 4)) == 35*_y**2 + 13*_y - 12,
+    ]
+    assert all(_ok), _ok
+except ImportError:
+    pass
+
+
 # ---------------- checks and pages ----------------
 import re as _re
 ALL = [("exercise-2-1", "प्रश्नावली 2.1", "एक चर वाले बहुपद", E1), ("exercise-2-2", "प्रश्नावली 2.2", "बहुपद के शून्यक", E2),
-       ("exercise-2-3", "प्रश्नावली 2.3", "बहुपदों का गुणनखंडन", E3)]
+       ("exercise-2-3", "प्रश्नावली 2.3", "बहुपदों का गुणनखंडन", E3),
+       ("exercise-2-4", "प्रश्नावली 2.4", "बीजीय सर्वसमिकाएँ", E4)]
 for _, _, _, E in ALL:
     for _q, _sol in E:
         for _t in _re.findall(r"\\\((.+?)\\\)", _q + _sol):
