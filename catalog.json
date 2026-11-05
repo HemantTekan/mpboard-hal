@@ -670,7 +670,41 @@
         "hi": "सांख्यिकी",
         "en": "Statistics"
        },
-       "items": []
+       "items": [
+        {
+         "slug": "exercise-13-1",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 13.1",
+          "en": "Exercise 13.1"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-13/exercise-13-1/"
+         }
+        },
+        {
+         "slug": "exercise-13-2",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 13.2",
+          "en": "Exercise 13.2"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-13/exercise-13-2/"
+         }
+        },
+        {
+         "slug": "exercise-13-3",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 13.3",
+          "en": "Exercise 13.3"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-13/exercise-13-3/"
+         }
+        }
+       ]
       },
       {
        "num": 14,
