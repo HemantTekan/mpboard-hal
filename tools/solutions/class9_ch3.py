@@ -196,7 +196,7 @@ for x, y, nm, *_ in T2:
     mv2 = f"ऊपर {abs(y):g}" if y > 0 else f"नीचे {abs(y):g}"
     rows.append([nm, m(f"({x}, {yv})"), mv1, mv2])
 s += table(["बिंदु", "निर्देशांक", "x-अक्ष पर", "फिर"], rows)
-s += why("R" + m("(0, -1.25)") + " का भुज 0 है, इसलिए यह " + m("y") + "-अक्ष पर ही, O से नीचे 1.25 एकक (1 और 2 के बीच, 1 से एक-चौथाई आगे) पर है।")
+s += why("R" + m("(0, -1.25)") + " का भुज 0 है, इसलिए यह " + m("y") + "-अक्ष पर ही, O से नीचे 1.25 एकक (" + m("-1") + " और " + m("-2") + " के बीच, " + m("-1") + " से एक-चौथाई नीचे) पर है।")
 s += plane((-4, 4), (-3, 9), 30, T2, "चित्र 3: सारणी के बिंदुओं P, Q, R, S, T का आलेखन")
 s += ans("बिंदु " + m("P(-2, 8),\\ Q(-1, 7),\\ R(0, -1.25),\\ S(1, 3),\\ T(3, -1)") + " आलेख में दिखाए गए हैं।")
 E2.append(("अक्षों पर दूरी का उपयुक्त एकक लेकर नीचे सारणी में दिए गए बिंदुओं को तल पर आलेखित कीजिए:"
@@ -210,7 +210,7 @@ for _, _, _, E in ALL:
             assert not _re.search(r"[\u0900-\u097F]", _t), ("Devanagari in TeX", _t)
 for i, (slug, title, topic, E) in enumerate(ALL):
     prev = (BASE + ALL[i - 1][0] + "/", ALL[i - 1][1]) if i else ("/hi/class-09/maths/chapter-02/exercise-2-4/", "प्रश्नावली 2.4")
-    nxt = (BASE + ALL[i + 1][0] + "/", ALL[i + 1][1]) if i + 1 < len(ALL) else (BASE, "अध्याय 3")
+    nxt = (BASE + ALL[i + 1][0] + "/", ALL[i + 1][1]) if i + 1 < len(ALL) else ("/hi/class-09/maths/chapter-04/exercise-4-1/", "प्रश्नावली 4.1")
     page(BASE, 3, CH, slug, title, f"कक्षा 9 गणित · अध्याय 3: निर्देशांक ज्यामिति · {len(E)} प्रश्न ({topic})", E,
          prev, nxt, css=CSS + EXTRA_CSS, boards=BOARDS9)
 print("ok")
