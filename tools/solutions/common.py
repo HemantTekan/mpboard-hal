@@ -234,10 +234,14 @@ footer{position:relative;z-index:1;text-align:center;color:var(--muted);font-siz
 """
 
 
-def page(BASE, chnum, chname, slug, title, sub, qs, prev, nxt, css=None):
-    """Write site/<BASE>/<slug>/index.html for one exercise.
+BOARDS = "यह हल <b>MP Board (MPBSE)</b>, <b>NCERT</b> और <b>CBSE</b> — तीनों के {CLS} गणित के विद्यार्थियों के लिए उपयोगी है, क्योंकि तीनों में गणित की पाठ्यपुस्तक NCERT की ही है।"
+
+
+def page(BASE, chnum, chname, slug, title, sub, qs, prev, nxt, css=None, boards=None):
+    """Write site/<BASE>/<slug>/index.html for one exercise (class taken from BASE).
     qs: list of (question text, solution html); prev/nxt: (href, label) or None.
     css: page stylesheet; defaults to CSS above (chapters may pass CSS + extra rules)."""
+    _cn = int(re.search(r"class-(\d+)", BASE).group(1)); CLS = f"कक्षा {_cn}"; CSL = f"class-{_cn:02d}"
     css = CSS if css is None else css
     body = "".join(q(i + 1, t, b, i % 6) for i, (t, b) in enumerate(qs))
     jump = "".join(f"<a href='#q{i + 1}'>प्र. {i + 1}</a>" for i in range(len(qs)))
@@ -245,17 +249,17 @@ def page(BASE, chnum, chname, slug, title, sub, qs, prev, nxt, css=None):
     nx = f"<a href='{nxt[0]}'>{e(nxt[1])} →</a>" if nxt else "<span></span>"
     doc = f"""<!doctype html>
 <html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>कक्षा 10 गणित {e(title)} हल | MP Board हल</title>
-<meta name="description" content="कक्षा 10 गणित अध्याय {chnum} {e(chname)}, {e(title)} के सभी प्रश्नों के चरणबद्ध हल — MP Board, NCERT और CBSE के लिए, हिंदी माध्यम।">
-<meta name="keywords" content="MP Board, MPBSE, NCERT, CBSE, कक्षा 10, गणित, हल, हिंदी माध्यम">
+<title>{CLS} गणित {e(title)} हल | MP Board हल</title>
+<meta name="description" content="{CLS} गणित अध्याय {chnum} {e(chname)}, {e(title)} के सभी प्रश्नों के चरणबद्ध हल — MP Board, NCERT और CBSE के लिए, हिंदी माध्यम।">
+<meta name="keywords" content="MP Board, MPBSE, NCERT, CBSE, {CLS}, गणित, हल, हिंदी माध्यम">
 <link rel="stylesheet" href="/assets/katex/katex.min.css"><style>{css}</style></head><body>
 <header class="top"><a class="brand" href="/hi/">MP Board हल</a><a class="sw" href="/en{BASE[3:]}">English Medium</a></header>
-<main><nav class="crumbs"><a href="/hi/">होम</a> › <a href="/hi/class-10/">कक्षा 10</a> › <a href="/hi/class-10/maths/">गणित</a> › <a href="{BASE}">अध्याय {chnum}</a> › <span>{e(title)}</span></nav>
+<main><nav class="crumbs"><a href="/hi/">होम</a> › <a href="/hi/{CSL}/">{CLS}</a> › <a href="/hi/{CSL}/maths/">गणित</a> › <a href="{BASE}">अध्याय {chnum}</a> › <span>{e(title)}</span></nav>
 <div class="hero"><h1>{e(title)} के हल</h1><p>{e(sub)}</p></div>
 <div class="jump">{jump}</div>
 {body}
 <div class="btns">{pv}{nx}</div>
-<p class="boards" style="font-size:14px;color:#555;margin:18px 0">यह हल <b>MP Board (MPBSE)</b>, <b>NCERT</b> और <b>CBSE</b> — तीनों के कक्षा 10 गणित के विद्यार्थियों के लिए उपयोगी है, क्योंकि तीनों में गणित की पाठ्यपुस्तक NCERT की ही है।</p>
+<p class="boards" style="font-size:14px;color:#555;margin:18px 0">{boards or BOARDS.format(CLS=CLS)}</p>
 </main><footer>© educationdew.com · MP Board, NCERT और CBSE पाठ्यपुस्तकों के चरणबद्ध हल</footer></body></html>
 """
     out = ROOT / "site" / BASE.strip("/") / slug / "index.html"
