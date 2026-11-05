@@ -289,13 +289,13 @@ assert len(E1) == 5
 # Exercise 2.2
 # =====================================================================
 E2 = []
-SUB = formula("बहुपद का मान", m("p(x)") + " में x के स्थान पर दी गई संख्या रखकर गणना करने से " + m("p(\\text{संख्या})").replace("\\text{संख्या}", "a") + " मिलता है।")
+SUB = formula("बहुपद का मान", m("p(x)") + " में " + m("x") + " के स्थान पर दी गई संख्या रखकर गणना करने से " + m("p(\\text{संख्या})").replace("\\text{संख्या}", "a") + " मिलता है।")
 s = SUB + p("माना " + m("p(x) = 5x - 4x^2 + 3") + "।")
 T = [(5, 1), (-4, 2), (3, 0)]
 outs = []
 for lab, v in (("(i)", 0), ("(ii)", -1), ("(iii)", 2)):
     st, val = subst("p", T, v)
-    s += part(f"{lab} x = {v}".replace("-", "−"), st + ans(f"मान = {num(val)}".replace("-", "−")))
+    s += part(lab + " " + m(f"x = {v}"), st + ans(f"मान = {num(val)}".replace("-", "−")))
     outs.append(f"{lab} {num(val)}".replace("-", "−"))
 assert [5 * v - 4 * v * v + 3 for v in (0, -1, 2)] == [3, -6, -3]
 s += ans(" ".join(outs))
