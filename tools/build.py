@@ -70,6 +70,9 @@ def boards_note(lang, path):
     if lang != "hi" or not m:
         return ""
     n = int(m.group(1) or m.group(2))
+    if n == 9:
+        return ('<p class="boards" style="font-size:14px;color:#555;margin-top:18px">यह सामग्री <b>MP Board (MPBSE)</b> '
+                'कक्षा 9 गणित की पाठ्यपुस्तक के अनुसार है।</p>')
     return ('<p class="boards" style="font-size:14px;color:#555;margin-top:18px">यह सामग्री <b>MP Board (MPBSE)</b>, '
             f'<b>NCERT</b> और <b>CBSE</b> — तीनों के कक्षा {n} गणित के विद्यार्थियों के लिए उपयोगी है, '
             'क्योंकि तीनों में गणित की पाठ्यपुस्तक NCERT की ही है। परीक्षा का प्रारूप बोर्ड के अनुसार अलग हो सकता है।</p>')

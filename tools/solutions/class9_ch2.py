@@ -955,7 +955,7 @@ for _, _, _, E in ALL:
             assert _t.count("{") == _t.count("}"), ("unbalanced TeX", _t)
 for i, (slug, title, topic, E) in enumerate(ALL):
     prev = (BASE + ALL[i - 1][0] + "/", ALL[i - 1][1]) if i else ("/hi/class-09/maths/chapter-01/exercise-1-5/", "प्रश्नावली 1.5")
-    nxt = (BASE + ALL[i + 1][0] + "/", ALL[i + 1][1]) if i + 1 < len(ALL) else (BASE, "अध्याय 2")
+    nxt = (BASE + ALL[i + 1][0] + "/", ALL[i + 1][1]) if i + 1 < len(ALL) else ("/hi/class-09/maths/chapter-03/exercise-3-1/", "प्रश्नावली 3.1")
     page(BASE, 2, CH, slug, title, f"कक्षा 9 गणित · अध्याय 2: बहुपद · {len(E)} प्रश्न ({topic})", E,
          prev, nxt, css=CSS + EXTRA_CSS, boards=BOARDS9)
 print("ok")

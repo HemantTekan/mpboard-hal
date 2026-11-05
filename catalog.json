@@ -177,6 +177,28 @@
        },
        "items": [
         {
+         "slug": "exercise-3-1",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 3.1",
+          "en": "Exercise 3.1"
+         },
+         "hi": {
+          "href": "/hi/class-09/maths/chapter-03/exercise-3-1/"
+         }
+        },
+        {
+         "slug": "exercise-3-2",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 3.2",
+          "en": "Exercise 3.2"
+         },
+         "hi": {
+          "href": "/hi/class-09/maths/chapter-03/exercise-3-2/"
+         }
+        },
+        {
          "slug": "notes",
          "type": "notes",
          "title": {
