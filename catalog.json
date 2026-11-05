@@ -281,7 +281,19 @@
         "hi": "यूक्लिड की ज्यामिति का परिचय",
         "en": "Introduction to Euclid's Geometry"
        },
-       "items": []
+       "items": [
+        {
+         "slug": "exercise-5-1",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 5.1",
+          "en": "Exercise 5.1"
+         },
+         "hi": {
+          "href": "/hi/class-09/maths/chapter-05/exercise-5-1/"
+         }
+        }
+       ]
       },
       {
        "num": 6,
