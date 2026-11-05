@@ -712,7 +712,19 @@
         "hi": "प्रायिकता",
         "en": "Probability"
        },
-       "items": []
+       "items": [
+        {
+         "slug": "exercise-14-1",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 14.1",
+          "en": "Exercise 14.1"
+         },
+         "hi": {
+          "href": "/hi/class-10/maths/chapter-14/exercise-14-1/"
+         }
+        }
+       ]
       }
      ]
     },
