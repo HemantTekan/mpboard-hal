@@ -1002,5 +1002,5 @@ check_tex(E2)
 page(BASE, 6, CH, "exercise-6-1", "प्रश्नावली 6.1", f"कक्षा 9 गणित · अध्याय 6: {CH} · {len(E1)} प्रश्न", E1,
      ("/hi/class-09/maths/chapter-05/exercise-5-1/", "प्रश्नावली 5.1"), (BASE + "exercise-6-2/", "प्रश्नावली 6.2"), css=CSS + EXTRA_CSS, boards=BOARDS9)
 page(BASE, 6, CH, "exercise-6-2", "प्रश्नावली 6.2", f"कक्षा 9 गणित · अध्याय 6: {CH} · {len(E2)} प्रश्न", E2,
-     (BASE + "exercise-6-1/", "प्रश्नावली 6.1"), (BASE, "अध्याय 6"), css=CSS + EXTRA_CSS, boards=BOARDS9)
+     (BASE + "exercise-6-1/", "प्रश्नावली 6.1"), ("/hi/class-09/maths/chapter-07/exercise-7-1/", "प्रश्नावली 7.1"), css=CSS + EXTRA_CSS, boards=BOARDS9)
 print("ok")

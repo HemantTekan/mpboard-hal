@@ -332,7 +332,41 @@
         "hi": "त्रिभुज",
         "en": "Triangles"
        },
-       "items": []
+       "items": [
+        {
+         "slug": "exercise-7-1",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 7.1",
+          "en": "Exercise 7.1"
+         },
+         "hi": {
+          "href": "/hi/class-09/maths/chapter-07/exercise-7-1/"
+         }
+        },
+        {
+         "slug": "exercise-7-2",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 7.2",
+          "en": "Exercise 7.2"
+         },
+         "hi": {
+          "href": "/hi/class-09/maths/chapter-07/exercise-7-2/"
+         }
+        },
+        {
+         "slug": "exercise-7-3",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 7.3",
+          "en": "Exercise 7.3"
+         },
+         "hi": {
+          "href": "/hi/class-09/maths/chapter-07/exercise-7-3/"
+         }
+        }
+       ]
       },
       {
        "num": 8,
