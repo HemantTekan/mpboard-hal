@@ -301,7 +301,30 @@
         "hi": "रेखाएँ और कोण",
         "en": "Lines and Angles"
        },
-       "items": []
+       "items": [
+        {
+         "slug": "exercise-6-1",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 6.1",
+          "en": "Exercise 6.1"
+         },
+         "hi": {
+          "href": "/hi/class-09/maths/chapter-06/exercise-6-1/"
+         }
+        },
+        {
+         "slug": "exercise-6-2",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 6.2",
+          "en": "Exercise 6.2"
+         },
+         "hi": {
+          "href": "/hi/class-09/maths/chapter-06/exercise-6-2/"
+         }
+        }
+       ]
       },
       {
        "num": 7,

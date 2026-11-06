@@ -305,5 +305,5 @@ for _q, _sol in E:
     for _t in _re.findall(r"\\\((.+?)\\\)", _q + _sol):
         assert not _re.search(r"[\u0900-\u097F]", _t), ("Devanagari in TeX", _t)
 page(BASE, 5, CH, "exercise-5-1", "प्रश्नावली 5.1", f"कक्षा 9 गणित · अध्याय 5: {CH} · {len(E)} प्रश्न", E,
-     ("/hi/class-09/maths/chapter-04/exercise-4-2/", "प्रश्नावली 4.2"), (BASE, "अध्याय 5"), css=CSS + EXTRA_CSS, boards=BOARDS9)
+     ("/hi/class-09/maths/chapter-04/exercise-4-2/", "प्रश्नावली 4.2"), ("/hi/class-09/maths/chapter-06/exercise-6-1/", "प्रश्नावली 6.1"), css=CSS + EXTRA_CSS, boards=BOARDS9)
 print("ok")
