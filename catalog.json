@@ -374,7 +374,30 @@
         "hi": "चतुर्भुज",
         "en": "Quadrilaterals"
        },
-       "items": []
+       "items": [
+        {
+         "slug": "exercise-8-1",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 8.1",
+          "en": "Exercise 8.1"
+         },
+         "hi": {
+          "href": "/hi/class-09/maths/chapter-08/exercise-8-1/"
+         }
+        },
+        {
+         "slug": "exercise-8-2",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 8.2",
+          "en": "Exercise 8.2"
+         },
+         "hi": {
+          "href": "/hi/class-09/maths/chapter-08/exercise-8-2/"
+         }
+        }
+       ]
       },
       {
        "num": 9,

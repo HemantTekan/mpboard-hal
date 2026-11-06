@@ -1272,5 +1272,5 @@ page(BASE, 7, CH, "exercise-7-1", "प्रश्नावली 7.1", SUB.form
 page(BASE, 7, CH, "exercise-7-2", "प्रश्नावली 7.2", SUB.format(len(E2)), E2,
      (BASE + "exercise-7-1/", "प्रश्नावली 7.1"), (BASE + "exercise-7-3/", "प्रश्नावली 7.3"), css=CSS + EXTRA_CSS, boards=BOARDS9)
 page(BASE, 7, CH, "exercise-7-3", "प्रश्नावली 7.3", SUB.format(len(E3)), E3,
-     (BASE + "exercise-7-2/", "प्रश्नावली 7.2"), (BASE, "अध्याय 7"), css=CSS + EXTRA_CSS, boards=BOARDS9)
+     (BASE + "exercise-7-2/", "प्रश्नावली 7.2"), ("/hi/class-09/maths/chapter-08/exercise-8-1/", "प्रश्नावली 8.1"), css=CSS + EXTRA_CSS, boards=BOARDS9)
 print("ok")
