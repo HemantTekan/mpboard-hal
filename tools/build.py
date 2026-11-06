@@ -308,6 +308,8 @@ def build():
                 continue
             ppath = f"/{lang}/papers/{p['slug']}/"
             d = p[lang]
+            if d.get("html"):
+                continue  # full HTML solution page written by tools/solutions/paper_*.py
             b = "<ul>" + "".join(f"<li>{e(x)}</li>" for x in d.get("summary", [])) + "</ul>"
             if d.get("disclaimer"):
                 b = ('<div style="background:#fff5e6;border-left:4px solid #f08c00;padding:10px 14px;border-radius:8px;margin:12px 0">'

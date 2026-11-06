@@ -938,6 +938,30 @@
  ],
  "papers": [
   {
+   "slug": "class-10-maths-standard-model-2026-27",
+   "class": 10,
+   "subject": "maths",
+   "title": {
+    "hi": "कक्षा 10 गणित (स्टैंडर्ड) — माशिमं आधिकारिक मॉडल प्रश्नपत्र 2026-27 का हल",
+    "en": "Class 10 Maths (Standard) MPBSE Model Paper 2026-27 Solutions"
+   },
+   "hi": {
+    "html": true
+   }
+  },
+  {
+   "slug": "class-10-maths-basic-model-2026-27",
+   "class": 10,
+   "subject": "maths",
+   "title": {
+    "hi": "कक्षा 10 गणित (बेसिक) — माशिमं आधिकारिक मॉडल प्रश्नपत्र 2026-27 का हल",
+    "en": "Class 10 Maths (Basic) MPBSE Model Paper 2026-27 Solutions"
+   },
+   "hi": {
+    "html": true
+   }
+  },
+  {
    "slug": "class-10-maths-half-yearly-practice-2026-27",
    "class": 10,
    "subject": "maths",

@@ -27,7 +27,10 @@ def chapter_scripts(only=None):
         m = re.fullmatch(r"class(\d+)_ch(\d+)\.py", f.name)
         if m and (not only or int(m.group(2)) in only):
             found.append(((int(m.group(1)), int(m.group(2))), f))
-    return [f for _, f in sorted(found)]
+    out = [f for _, f in sorted(found)]
+    if not only:
+        out += sorted(SOLUTIONS.glob("paper_*.py"))
+    return out
 
 
 def run(script):
