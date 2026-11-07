@@ -13,7 +13,7 @@ grid with the scale stated, axis titles and a kink when an axis does not start a
 graph; units everywhere; no जाँच boxes. Answers are checked privately with asserts.
 Run from repo root: python3 tools/solutions/class9_ch12.py
 """
-import sys, pathlib, re
+import sys, pathlib, re, zlib
 from fractions import Fraction as F
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from common import *  # noqa
@@ -168,7 +168,7 @@ class G:
         ax = []
         mk = ("<marker id='{id}' viewBox='0 0 10 10' refX='9' refY='5' markerWidth='9' markerHeight='9' markerUnits='userSpaceOnUse' orient='auto'>"
               "<path d='M0,0 L10,5 L0,10 z' fill='#222'/></marker>")
-        mid = f"ar{abs(hash(cap)) % 10 ** 6}"
+        mid = f"ar{zlib.crc32(cap.encode()) % 10 ** 6}"
         z = 4.5
         if self.kx:
             a, b = ox + .28 * P, ox + .72 * P
