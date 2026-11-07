@@ -1,5 +1,5 @@
-// educationdew Worker: static site is served by the assets layer; only /api/* reaches this code
-// (assets.config.run_worker_first = ["/api/*"]). Add a feature = add a file in ./routes and one line in ROUTES.
+// educationdew Worker: static site is served by the assets layer; this code runs first on every request
+// (assets.config.run_worker_first = true). Add a feature = add a file in ./routes and one line in ROUTES.
 import * as quiz from "./routes/quiz.js";
 import * as admin from "./routes/admin.js";
 import { json, error } from "./lib/http.js";
@@ -20,6 +20,11 @@ const ROUTES = [
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    // One canonical address for SEO: www.educationdew.com -> educationdew.com (301), API excepted.
+    if (url.hostname === "www.educationdew.com" && !url.pathname.startsWith("/api/")) {
+      url.hostname = "educationdew.com";
+      return Response.redirect(url.toString(), 301);
+    }
     if (!url.pathname.startsWith("/api/")) return env.ASSETS.fetch(request);
     if (request.method === "OPTIONS") return new Response(null, { status: 204 });
     for (const [method, re, handler] of ROUTES) {

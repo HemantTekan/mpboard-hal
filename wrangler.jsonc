@@ -1,5 +1,5 @@
 // educationdew.com Worker config: single source of truth, read by tools/deploy_worker.py (and wrangler-compatible).
-// Static site = site/ (served by assets layer). Only /api/* runs worker code.
+// Static site = site/ (served by assets layer). Worker runs first on every request: www -> apex 301, /api/* -> API, rest -> assets.
 // New storage later: add an "r2_buckets": [{"binding": "FILES", "bucket_name": "educationdew-files"}] block; nothing else changes.
 {
   "name": "educationdew",
@@ -17,7 +17,7 @@
     "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page",
-    "run_worker_first": ["/api/*"]
+    "run_worker_first": true
   },
   "d1_databases": [
     {
