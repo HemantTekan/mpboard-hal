@@ -520,7 +520,19 @@
         "hi": "सांख्यिकी",
         "en": "Statistics"
        },
-       "items": []
+       "items": [
+        {
+         "slug": "exercise-12-1",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 12.1",
+          "en": "Exercise 12.1"
+         },
+         "hi": {
+          "href": "/hi/class-09/maths/chapter-12/exercise-12-1/"
+         }
+        }
+       ]
       }
      ]
     },

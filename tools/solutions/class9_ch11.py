@@ -1224,7 +1224,7 @@ for i, (sl, nm, E) in enumerate(EXS):
     E[0] = (E[0][0], PIN + E[0][1])
     check_tex(E)
     prev = (BASE + f"exercise-{EXS[i - 1][0]}/", "प्रश्नावली " + EXS[i - 1][1]) if i else ("/hi/class-09/maths/chapter-10/exercise-10-1/", "प्रश्नावली 10.1")
-    nxt = (BASE + f"exercise-{EXS[i + 1][0]}/", "प्रश्नावली " + EXS[i + 1][1]) if i < 3 else (BASE, "अध्याय 11")
+    nxt = (BASE + f"exercise-{EXS[i + 1][0]}/", "प्रश्नावली " + EXS[i + 1][1]) if i < 3 else ("/hi/class-09/maths/chapter-12/exercise-12-1/", "प्रश्नावली 12.1")
     page(BASE, 11, CH, f"exercise-{sl}", f"प्रश्नावली {nm}", SUB.format(len(E)), E, prev, nxt, css=CSS + EXTRA_CSS, boards=BOARDS11)
 for k_, v_ in ANS.items():
     print(k_, v_)
