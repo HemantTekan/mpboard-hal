@@ -405,7 +405,41 @@
         "hi": "वृत्त",
         "en": "Circles"
        },
-       "items": []
+       "items": [
+        {
+         "slug": "exercise-9-1",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 9.1",
+          "en": "Exercise 9.1"
+         },
+         "hi": {
+          "href": "/hi/class-09/maths/chapter-09/exercise-9-1/"
+         }
+        },
+        {
+         "slug": "exercise-9-2",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 9.2",
+          "en": "Exercise 9.2"
+         },
+         "hi": {
+          "href": "/hi/class-09/maths/chapter-09/exercise-9-2/"
+         }
+        },
+        {
+         "slug": "exercise-9-3",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 9.3",
+          "en": "Exercise 9.3"
+         },
+         "hi": {
+          "href": "/hi/class-09/maths/chapter-09/exercise-9-3/"
+         }
+        }
+       ]
       },
       {
        "num": 10,

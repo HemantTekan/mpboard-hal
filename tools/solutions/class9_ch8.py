@@ -1169,5 +1169,5 @@ SUB = "कक्षा 9 गणित · अध्याय 8: " + CH + " · {} 
 page(BASE, 8, CH, "exercise-8-1", "प्रश्नावली 8.1", SUB.format(len(E1)), E1,
      ("/hi/class-09/maths/chapter-07/exercise-7-3/", "प्रश्नावली 7.3"), (BASE + "exercise-8-2/", "प्रश्नावली 8.2"), css=CSS + EXTRA_CSS, boards=BOARDS9)
 page(BASE, 8, CH, "exercise-8-2", "प्रश्नावली 8.2", SUB.format(len(E2)), E2,
-     (BASE + "exercise-8-1/", "प्रश्नावली 8.1"), (BASE, "अध्याय 8"), css=CSS + EXTRA_CSS, boards=BOARDS9)
+     (BASE + "exercise-8-1/", "प्रश्नावली 8.1"), ("/hi/class-09/maths/chapter-09/exercise-9-1/", "प्रश्नावली 9.1"), css=CSS + EXTRA_CSS, boards=BOARDS9)
 print("ok")
