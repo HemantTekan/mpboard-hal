@@ -467,7 +467,52 @@
         "hi": "पृष्ठीय क्षेत्रफल और आयतन",
         "en": "Surface Areas and Volumes"
        },
-       "items": []
+       "items": [
+        {
+         "slug": "exercise-11-1",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 11.1",
+          "en": "Exercise 11.1"
+         },
+         "hi": {
+          "href": "/hi/class-09/maths/chapter-11/exercise-11-1/"
+         }
+        },
+        {
+         "slug": "exercise-11-2",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 11.2",
+          "en": "Exercise 11.2"
+         },
+         "hi": {
+          "href": "/hi/class-09/maths/chapter-11/exercise-11-2/"
+         }
+        },
+        {
+         "slug": "exercise-11-3",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 11.3",
+          "en": "Exercise 11.3"
+         },
+         "hi": {
+          "href": "/hi/class-09/maths/chapter-11/exercise-11-3/"
+         }
+        },
+        {
+         "slug": "exercise-11-4",
+         "type": "exercise",
+         "title": {
+          "hi": "प्रश्नावली 11.4",
+          "en": "Exercise 11.4"
+         },
+         "hi": {
+          "href": "/hi/class-09/maths/chapter-11/exercise-11-4/"
+         }
+        }
+       ]
       },
       {
        "num": 12,

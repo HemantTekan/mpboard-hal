@@ -669,7 +669,7 @@ E1 = [(qt(a), b) for a, b in E1]
 check_tex(E1)
 SUB = "कक्षा 9 गणित · अध्याय 10: " + CH + " · {} प्रश्न"
 page(BASE, 10, CH, "exercise-10-1", "प्रश्नावली 10.1", SUB.format(len(E1)), E1,
-     ("/hi/class-09/maths/chapter-09/exercise-9-3/", "प्रश्नावली 9.3"), (BASE, "अध्याय 10"), css=CSS + EXTRA_CSS, boards=BOARDS10)
+     ("/hi/class-09/maths/chapter-09/exercise-9-3/", "प्रश्नावली 9.3"), ("/hi/class-09/maths/chapter-11/exercise-11-1/", "प्रश्नावली 11.1"), css=CSS + EXTRA_CSS, boards=BOARDS10)
 for k_, v_ in ANS.items():
     print(k_, v_)
 print("ok")
